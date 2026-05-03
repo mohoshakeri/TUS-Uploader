@@ -825,12 +825,16 @@
 
 <script src="/static/tus.js"></script>
 <script>
+  const METRICS_UPDATE_INTERVAL_MS = 1500;
+
   // ─── State ───────────────────────────────────────────────────────────────────
   const state = {
     config: null,
     currentUploadId: null,
     previousBytes: 0,
     previousTime: 0,
+    metricsTimerId: null,
+    latestMetrics: null,
     selectedFile: null,
     currentUpload: null,
   };
@@ -947,8 +951,7 @@
   }
 
   // ─── MetricsUpdater ───────────────────────────────────────────────────────────
-  function updateMetrics(bytesUploaded, bytesTotal) {
-    const now = performance.now();
+  function renderMetrics(bytesUploaded, bytesTotal, now = performance.now()) {
     const elapsed = (now - state.previousTime) / 1000;
     const speed = elapsed > 0 ? (bytesUploaded - state.previousBytes) / elapsed : 0;
     const remaining = Math.max(bytesTotal - bytesUploaded, 0);
@@ -965,13 +968,40 @@
     state.previousTime = now;
   }
 
+  function stopMetricsTimer() {
+    if (!state.metricsTimerId) return;
+    clearInterval(state.metricsTimerId);
+    state.metricsTimerId = null;
+  }
+
+  function flushMetrics(force = false) {
+    if (!state.latestMetrics) return;
+    if (!force && state.latestMetrics.bytesUploaded === state.previousBytes) return;
+    renderMetrics(state.latestMetrics.bytesUploaded, state.latestMetrics.bytesTotal, state.latestMetrics.timestamp);
+  }
+
+  function updateMetrics(bytesUploaded, bytesTotal) {
+    state.latestMetrics = {
+      bytesUploaded,
+      bytesTotal,
+      timestamp: performance.now(),
+    };
+  }
+
+  function startMetricsTimer() {
+    stopMetricsTimer();
+    state.metricsTimerId = setInterval(() => flushMetrics(), METRICS_UPDATE_INTERVAL_MS);
+  }
+
   // ─── FileSelector ─────────────────────────────────────────────────────────────
   function selectFile(file) {
     state.selectedFile = file;
     state.currentUpload = null;
     state.currentUploadId = null;
+    state.latestMetrics = null;
     state.previousBytes = 0;
     state.previousTime = performance.now();
+    stopMetricsTimer();
 
     resetLinkBox();
     refs.progressStage.classList.remove("visible");
@@ -1016,6 +1046,14 @@
     refs.progressValue.textContent = "0%";
     refs.speedValue.textContent = "0 B/s";
     refs.etaValue.textContent = "--";
+    state.latestMetrics = {
+      bytesUploaded: 0,
+      bytesTotal: state.selectedFile.size || 0,
+      timestamp: performance.now(),
+    };
+    state.previousBytes = 0;
+    state.previousTime = state.latestMetrics.timestamp;
+    startMetricsTimer();
 
     setStatus("در حال آپلود", "uploading");
     showToast("آپلود آغاز شد.");
@@ -1030,6 +1068,8 @@
         filetype: state.selectedFile.type || "application/octet-stream",
       },
       onError(error) {
+        stopMetricsTimer();
+        flushMetrics(true);
         setStatus("خطا", "error");
         refs.retryButton.disabled = false;
         refs.uploadButton.disabled = false;
@@ -1041,6 +1081,8 @@
       },
       async onSuccess() {
         try {
+          flushMetrics(true);
+          stopMetricsTimer();
           state.currentUploadId = extractUploadId(state.currentUpload.url);
           setStatus("تکمیل شد", "success");
           refs.retryButton.disabled = true;
@@ -1102,6 +1144,9 @@
       if (!state.currentUpload) { createUpload(); return; }
       refs.retryButton.disabled = true;
       refs.uploadButton.disabled = true;
+      state.previousBytes = state.latestMetrics?.bytesUploaded || 0;
+      state.previousTime = performance.now();
+      startMetricsTimer();
       setStatus("در حال ادامه", "uploading");
       showToast("آپلود از آخرین بخش تاییدشده ادامه پیدا کرد.");
       state.currentUpload.start();
