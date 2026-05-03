@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta name="color-scheme" content="light dark"/>
+        <title>آپلودر TUS</title>
+        <link rel="icon" href="/static/favicon.ico"/>
+        <link
+                rel="stylesheet"
+                href="https://lib.arvancloud.ir/vazir-font/33.003/Farsi-Digits-Non-Latin/Vazirmatn-FD-NL-font-face.css"
+        />
+
+        <style>
+                :root {
+                  color-scheme: light;
+                  --bg: #f7f7f7;
+                  --card: #ffffff;
+                  --soft: #f0f0f0;
+                  --text: #111111;
+                  --muted: #666666;
+                  --line: #dedede;
+                  --accent: #111111;
+                  --success: #0f8a43;
+                  --error: #c72828;
+                }
+
+                body[data-theme="dark"] {
+                  color-scheme: dark;
+                  --bg: #0d0d0d;
+                  --card: #171717;
+                  --soft: #202020;
+                  --text: #f5f5f5;
+                  --muted: #b2b2b2;
+                  --line: #303030;
+                  --accent: #ffffff;
+                  --success: #49d17c;
+                  --error: #ff7d7d;
+                }
+
+                * {
+                  box-sizing: border-box;
+                }
+
+                html,
+                body {
+                  margin: 0;
+                  min-height: 100%;
+                }
+
+                body {
+                  font-family: Vazirmatn FD NL, sans-serif;
+                  background: var(--bg);
+                  color: var(--text);
+                  transition: background 0.2s ease, color 0.2s ease;
+                }
+
+                .page-shell {
+                  min-height: 100vh;
+                  display: grid;
+                  place-items: center;
+                  padding: 20px;
+                }
+
+                .single-card {
+                  width: min(100%, 760px);
+                  background: var(--card);
+                  border: 1px solid var(--line);
+                  border-radius: 28px;
+                  padding: 28px;
+                  text-align: center;
+                  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.08);
+                }
+
+                .theme-toggle,
+                .primary-button,
+                .ghost-button,
+                #copyButton {
+                  font: inherit;
+                  border-radius: 14px;
+                  border: 1px solid var(--line);
+                  cursor: pointer;
+                  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+                }
+
+                .theme-toggle:hover,
+                .primary-button:hover,
+                .ghost-button:hover,
+                #copyButton:hover,
+                .drop-zone:hover {
+                  transform: translateY(-2px);
+                }
+
+                .theme-toggle {
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 10px;
+                  background: var(--soft);
+                  color: var(--text);
+                  padding: 10px 16px;
+                  margin: 0 auto 20px;
+                }
+
+                .toggle-dot {
+                  width: 24px;
+                  height: 12px;
+                  border-radius: 999px;
+                  background: var(--accent);
+                }
+
+                .brand-logo {
+                  width: 164px;
+                  height: 164px;
+                  object-fit: contain;
+                  display: block;
+                  margin: 0 auto 16px;
+                }
+
+                body[data-theme="dark"] .brand-logo {
+                  filter: invert(0.9);
+                }
+
+                .eyebrow {
+                  margin: 0 0 10px;
+                  color: var(--muted);
+                  font-size: 0.9rem;
+                }
+
+                h1 {
+                  margin: 0 0 10px;
+                  font-size: clamp(1.6rem, 4vw, 2.4rem);
+                }
+
+                .hero-text {
+                  margin: 0 auto 24px;
+                  max-width: 40rem;
+                  color: var(--muted);
+                  line-height: 1.9;
+                }
+
+                .password-wrap {
+                  width: min(100%, 420px);
+                  margin: 0 auto 18px;
+                  text-align: right;
+                }
+
+                .password-wrap label {
+                  display: block;
+                  margin-bottom: 8px;
+                  color: var(--muted);
+                  font-size: 0.92rem;
+                }
+
+                .password-wrap input {
+                  width: 100%;
+                  padding: 13px 14px;
+                  border-radius: 14px;
+                  border: 1px solid var(--line);
+                  background: var(--soft);
+                  color: var(--text);
+                  font: inherit;
+                }
+
+                .drop-zone {
+                  display: grid;
+                  gap: 10px;
+                  justify-items: center;
+                  padding: 34px 18px;
+                  border: 2px dashed var(--accent);
+                  border-radius: 22px;
+                  background: var(--soft);
+                  cursor: pointer;
+                  margin-bottom: 18px;
+                  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+                }
+
+                .drop-zone.dragover {
+                  background: var(--text);
+                  color: var(--bg);
+                }
+
+                .drop-zone small {
+                  color: var(--muted);
+                }
+
+                .drop-icon {
+                  width: 54px;
+                  height: 54px;
+                  display: grid;
+                  place-items: center;
+                  border-radius: 50%;
+                  background: var(--accent);
+                  color: var(--bg);
+                  font-size: 2rem;
+                }
+
+                .action-row,
+                .status-row,
+                .link-row {
+                  display: flex;
+                  gap: 12px;
+                  justify-content: center;
+                  align-items: center;
+                }
+
+                .action-row {
+                  margin-bottom: 18px;
+                }
+
+                .primary-button,
+                .ghost-button,
+                #copyButton {
+                  padding: 12px 18px;
+                  background: var(--soft);
+                  color: var(--text);
+                }
+
+                .primary-button {
+                  background: var(--accent);
+                  color: var(--bg);
+                  border-color: var(--accent);
+                }
+
+                .primary-button:disabled,
+                .ghost-button:disabled {
+                  opacity: 0.45;
+                  cursor: not-allowed;
+                  transform: none;
+                }
+
+                .status-row {
+                  flex-wrap: wrap;
+                  margin-bottom: 14px;
+                  color: var(--muted);
+                }
+
+                .status-pill {
+                  padding: 7px 12px;
+                  border-radius: 999px;
+                  background: var(--soft);
+                  color: var(--text);
+                }
+
+                .inline-link {
+                  margin-top: 0;
+                  margin-bottom: 18px;
+                }
+
+                .progress-stage {
+                  margin-bottom: 16px;
+                }
+
+                .progress-meta {
+                  display: grid;
+                  gap: 10px;
+                  align-items: center;
+                }
+
+                .progress-meta.top {
+                  grid-template-columns: 1.4fr 0.9fr 1.2fr;
+                  margin-bottom: 10px;
+                }
+
+                .progress-meta.bottom {
+                  grid-template-columns: repeat(2, minmax(0, 1fr));
+                  margin-top: 10px;
+                }
+
+                .meta-chip,
+                .message-box,
+                .link-box {
+                  background: var(--soft);
+                  border: 1px solid var(--line);
+                  border-radius: 16px;
+                }
+
+                .meta-chip {
+                  padding: 12px 14px;
+                  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent), var(--soft);
+                }
+
+                .meta-chip span {
+                  display: block;
+                  font-size: 0.82rem;
+                  color: var(--muted);
+                  margin-bottom: 8px;
+                }
+
+                .meta-chip strong {
+                  font-size: 1.08rem;
+                }
+
+                .meta-chip.center {
+                  transform: translateY(8px);
+                }
+
+                .progress-shell {
+                  position: relative;
+                  width: 100%;
+                  height: 20px;
+                  border-radius: 999px;
+                  background:
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent),
+                    var(--soft);
+                  overflow: hidden;
+                  border: 1px solid var(--line);
+                }
+
+                .progress-shell::after {
+                  content: "";
+                  position: absolute;
+                  inset: 3px;
+                  border-radius: inherit;
+                  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+                }
+
+                .progress-bar {
+                  width: 0;
+                  height: 100%;
+                  border-radius: inherit;
+                  background: linear-gradient(90deg, var(--accent), #8b8b8b);
+                  transition: width 0.15s ease;
+                }
+
+                .message-box,
+                .link-box {
+                  margin-top: 16px;
+                  padding: 14px;
+                }
+
+                .message-box.is-error {
+                  color: var(--error);
+                  border-color: var(--error);
+                }
+
+                .message-box.is-success {
+                  color: var(--success);
+                  border-color: var(--success);
+                }
+
+                .link-box label {
+                  display: block;
+                  margin-bottom: 10px;
+                }
+
+                #downloadLink {
+                  width: 100%;
+                  min-width: 0;
+                  padding: 12px 14px;
+                  border-radius: 12px;
+                  border: 1px solid var(--line);
+                  background: var(--card);
+                  color: var(--text);
+                  font: inherit;
+                }
+
+                @media (max-width: 820px) {
+                  .progress-meta.top,
+                  .progress-meta.bottom {
+                    grid-template-columns: 1fr;
+                  }
+
+                  .meta-chip.center {
+                    transform: none;
+                  }
+                }
+
+                @media (max-width: 560px) {
+                  .single-card {
+                    padding: 18px;
+                  }
+
+                  .action-row,
+                  .link-row {
+                    flex-direction: column;
+                  }
+
+                  .primary-button,
+                  .ghost-button,
+                  #copyButton {
+                    width: 100%;
+                  }
+
+                  .password-wrap {
+                    width: 100%;
+                  }
+                }
+        </style>
+</head>
+<body data-theme="light">
+<main class="page-shell">
+        <section class="single-card">
+                <img src="/static/logo.png" alt="لوگو" class="brand-logo"/>
+                <button id="themeToggle" class="theme-toggle" type="button" aria-label="تغییر تم">
+                        <span>لایت</span>
+                        <span class="toggle-dot"></span>
+                        <span>دارک</span>
+                </button>
+                <h1>فایل را بکشید و اینجا رها کنید</h1>
+                <p class="hero-text">یا با یک کلیک فایل را انتخاب کنید. آپلود در صورت خطا از همان بخش ادامه پیدا
+                        می‌کند.</p>
+
+                <div class="password-wrap" id="passwordWrap">
+                        <label for="passwordInput">پسورد آپلود</label>
+                        <input id="passwordInput" type="password" placeholder="پسورد را وارد کنید"
+                               autocomplete="current-password"/>
+                </div>
+
+                <label id="dropZone" class="drop-zone" for="fileInput">
+                        <input id="fileInput" type="file" hidden/>
+                        <span class="drop-icon">+</span>
+                        <strong>ناحیه آپلود</strong>
+                        <span>Drag & Drop یا انتخاب فایل</span>
+                        <small id="allowedTypes">در حال بارگذاری فرمت‌های مجاز...</small>
+                </label>
+
+                <div class="action-row">
+                        <button id="uploadButton" class="primary-button" type="button" disabled>شروع آپلود</button>
+                        <button id="retryButton" class="ghost-button" type="button" disabled>ادامه آپلود</button>
+                </div>
+
+                <div class="status-row">
+                        <span class="status-pill" id="statusPill">آماده</span>
+                        <span id="fileName">فایلی انتخاب نشده است</span>
+                </div>
+
+                <div class="link-box inline-link" id="linkBox" hidden>
+                        <label for="downloadLink">لینک مستقیم فایل</label>
+                        <div class="link-row">
+                                <input id="downloadLink" type="text" readonly/>
+                                <button id="copyButton" type="button">کپی</button>
+                        </div>
+                </div>
+
+                <div class="progress-stage">
+                        <div class="progress-meta top">
+                                <div class="meta-chip wide">
+                                        <span>حجم انتقال</span>
+                                        <strong>
+                                                <bdi id="uploadedSize">0 B</bdi>
+                                                /
+                                                <bdi id="totalSize">0 B</bdi>
+                                        </strong>
+                                </div>
+                                <div class="meta-chip center">
+                                        <span>پیشرفت</span>
+                                        <strong id="progressValue">0%</strong>
+                                </div>
+                                <div class="meta-chip wide">
+                                        <span>سرعت</span>
+                                        <strong id="speedValue">0 B/s</strong>
+                                </div>
+                        </div>
+
+                        <div class="progress-shell" aria-hidden="true">
+                                <div id="progressBar" class="progress-bar"></div>
+                        </div>
+
+                        <div class="progress-meta bottom">
+                                <div class="meta-chip">
+                                        <span>زمان تخمینی</span>
+                                        <strong id="etaValue">--</strong>
+                                </div>
+                                <div class="meta-chip">
+                                        <span>وضعیت</span>
+                                        <strong id="statusEcho">آماده</strong>
+                                </div>
+                        </div>
+                </div>
+
+                <div class="message-box" id="messageBox">منتظر انتخاب فایل هستم.</div>
+        </section>
+</main>
+    <script
+      src="/static/tus.js"></script>
+<script>
+        const state = {
+          config: null,
+          currentUploadId: null,
+          previousBytes: 0,
+          previousTime: 0,
+          selectedFile: null,
+          currentUpload: null,
+        };
+
+        const refs = {
+          statusPill: document.getElementById("statusPill"),
+          fileName: document.getElementById("fileName"),
+          uploadedSize: document.getElementById("uploadedSize"),
+          totalSize: document.getElementById("totalSize"),
+          progressValue: document.getElementById("progressValue"),
+          speedValue: document.getElementById("speedValue"),
+          etaValue: document.getElementById("etaValue"),
+          progressBar: document.getElementById("progressBar"),
+          messageBox: document.getElementById("messageBox"),
+          allowedTypes: document.getElementById("allowedTypes"),
+          linkBox: document.getElementById("linkBox"),
+          downloadLink: document.getElementById("downloadLink"),
+          copyButton: document.getElementById("copyButton"),
+          retryButton: document.getElementById("retryButton"),
+          themeToggle: document.getElementById("themeToggle"),
+          uploadButton: document.getElementById("uploadButton"),
+          fileInput: document.getElementById("fileInput"),
+          dropZone: document.getElementById("dropZone"),
+          passwordInput: document.getElementById("passwordInput"),
+          passwordWrap: document.getElementById("passwordWrap"),
+          statusEcho: document.getElementById("statusEcho"),
+        };
+
+        function formatBytes(bytes) {
+          if (!bytes) return "0 B";
+          const units = ["B", "KB", "MB", "GB", "TB"];
+          const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+          const value = bytes / 1024 ** index;
+          return `${value.toFixed(value >= 100 || index === 0 ? 0 : 2)} ${units[index]}`;
+        }
+
+        function formatEta(seconds) {
+          if (!Number.isFinite(seconds) || seconds < 0) return "--";
+          const minutes = Math.floor(seconds / 60);
+          const remainder = Math.floor(seconds % 60);
+          if (minutes === 0) return `${remainder}s`;
+          return `${minutes}m ${remainder}s`;
+        }
+
+        function setMessage(text, variant = "") {
+          refs.messageBox.textContent = text;
+          refs.messageBox.classList.remove("is-error", "is-success");
+          if (variant) refs.messageBox.classList.add(`is-${variant}`);
+        }
+
+        function setStatus(text) {
+          refs.statusPill.textContent = text;
+          refs.statusEcho.textContent = text;
+        }
+
+        function updateTheme() {
+          const current = document.body.dataset.theme;
+          const next = current === "light" ? "dark" : "light";
+          document.body.dataset.theme = next;
+          localStorage.setItem("theme", next);
+        }
+
+        function hydrateTheme() {
+          const savedTheme = localStorage.getItem("theme");
+          document.body.dataset.theme = savedTheme === "dark" ? "dark" : "light";
+        }
+
+        async function loadConfig() {
+          const response = await fetch("/api/config");
+          if (!response.ok) throw new Error("دریافت تنظیمات آپلود ناموفق بود.");
+          state.config = await response.json();
+          refs.allowedTypes.textContent = `فرمت‌های مجاز: ${state.config.allowed_extensions.join(" ، ")}`;
+          refs.passwordWrap.hidden = !state.config.password_required;
+        }
+
+        function extractUploadId(uploadURL) {
+          const parts = new URL(uploadURL).pathname.split("/").filter(Boolean);
+          return parts.at(-1);
+        }
+
+        async function fetchDownloadLink(uploadId) {
+          const response = await fetch(`/api/files/${uploadId}/link`);
+          const payload = await response.json();
+          if (!response.ok) {
+            throw new Error(payload.detail || "دریافت لینک نهایی ممکن نشد.");
+          }
+          refs.downloadLink.value = payload.download_url;
+          refs.linkBox.hidden = false;
+        }
+
+        function resetLinkBox() {
+          refs.linkBox.hidden = true;
+          refs.downloadLink.value = "";
+        }
+
+        function updateMetrics(bytesUploaded, bytesTotal) {
+          const now = performance.now();
+          const elapsed = (now - state.previousTime) / 1000;
+          const transferred = bytesUploaded - state.previousBytes;
+          const speed = elapsed > 0 ? transferred / elapsed : 0;
+          const remaining = Math.max(bytesTotal - bytesUploaded, 0);
+          const eta = speed > 0 ? remaining / speed : Infinity;
+          const progress = bytesTotal > 0 ? (bytesUploaded / bytesTotal) * 100 : 0;
+
+          refs.uploadedSize.textContent = formatBytes(bytesUploaded);
+          refs.totalSize.textContent = formatBytes(bytesTotal);
+          refs.progressValue.textContent = `${progress.toFixed(1)}%`;
+          refs.speedValue.textContent = `${formatBytes(speed)}/s`;
+          refs.etaValue.textContent = formatEta(eta);
+          refs.progressBar.style.width = `${progress}%`;
+
+          state.previousBytes = bytesUploaded;
+          state.previousTime = now;
+        }
+
+        function selectFile(file) {
+          state.selectedFile = file;
+          state.currentUpload = null;
+          state.currentUploadId = null;
+          state.previousBytes = 0;
+          state.previousTime = performance.now();
+          resetLinkBox();
+          refs.uploadButton.disabled = false;
+          refs.retryButton.disabled = true;
+          refs.fileName.textContent = file.name;
+          setStatus("آماده");
+          refs.uploadedSize.textContent = "0 B";
+          refs.totalSize.textContent = formatBytes(file.size || 0);
+          refs.progressValue.textContent = "0%";
+          refs.speedValue.textContent = "0 B/s";
+          refs.etaValue.textContent = "--";
+          refs.progressBar.style.width = "0%";
+          setMessage("فایل انتخاب شد. برای شروع روی دکمه آپلود بزنید.");
+        }
+
+        function validateSelectedFile(file) {
+          const suffix = `.${file.name.split(".").pop()?.toLowerCase() || ""}`;
+          if (!state.config.allowed_extensions.includes(suffix)) {
+            throw new Error("فرمت این فایل مجاز نیست.");
+          }
+          if (file.size > state.config.max_upload_size) {
+            throw new Error("حجم فایل از حد مجاز بیشتر است.");
+          }
+        }
+
+        function createUpload() {
+          if (!state.selectedFile) {
+            setMessage("ابتدا یک فایل انتخاب کنید.", "error");
+            return;
+          }
+
+          if (state.config.password_required && !refs.passwordInput.value.trim()) {
+            setMessage("پسورد آپلود الزامی است.", "error");
+            return;
+          }
+
+          validateSelectedFile(state.selectedFile);
+          refs.uploadButton.disabled = true;
+          refs.retryButton.disabled = true;
+          setStatus("در حال آپلود");
+          setMessage("آپلود شروع شد.");
+
+          state.currentUpload = new tus.Upload(state.selectedFile, {
+            endpoint: state.config.upload_endpoint,
+            chunkSize: state.config.chunk_size,
+            retryDelays: [0, 1500, 3000, 5000],
+            headers: {
+              "X-Upload-Password": refs.passwordInput.value.trim(),
+            },
+            metadata: {
+              filename: state.selectedFile.name,
+              filetype: state.selectedFile.type || "application/octet-stream",
+            },
+            onError(error) {
+              setStatus("خطا");
+              refs.retryButton.disabled = false;
+              refs.uploadButton.disabled = false;
+              setMessage(error.message || "آپلود با خطا متوقف شد.", "error");
+            },
+            onProgress(bytesUploaded, bytesTotal) {
+              setStatus("در حال آپلود");
+              updateMetrics(bytesUploaded, bytesTotal);
+            },
+            async onSuccess() {
+              try {
+                state.currentUploadId = extractUploadId(state.currentUpload.url);
+                setStatus("تکمیل شد");
+                refs.retryButton.disabled = true;
+                refs.uploadButton.disabled = false;
+                const extension = state.selectedFile.name.split(".").pop()?.toLowerCase() || "";
+                refs.downloadLink.value = `${state.config.base_url}/uploads/${state.currentUploadId}${extension ? `.${extension}` : ""}`;
+                refs.linkBox.hidden = false;
+                setMessage("آپلود با موفقیت تمام شد و لینک مستقیم فایل آماده است.", "success");
+              } catch (error) {
+                refs.retryButton.disabled = false;
+                setMessage(error.message, "error");
+              }
+            },
+          });
+
+          state.currentUpload.findPreviousUploads().then((previousUploads) => {
+            if (previousUploads.length > 0) {
+              state.currentUpload.resumeFromPreviousUpload(previousUploads[0]);
+            }
+            state.currentUpload.start();
+          }).catch((error) => {
+            setStatus("خطا");
+            refs.uploadButton.disabled = false;
+            refs.retryButton.disabled = false;
+            setMessage(error.message || "شروع آپلود ممکن نشد.", "error");
+          });
+        }
+
+        async function buildUploader() {
+          await loadConfig();
+
+          refs.fileInput.addEventListener("change", (event) => {
+            const [file] = event.target.files;
+            if (!file) return;
+            try {
+              validateSelectedFile(file);
+              selectFile(file);
+            } catch (error) {
+              setMessage(error.message, "error");
+            }
+          });
+
+          refs.dropZone.addEventListener("dragover", (event) => {
+            event.preventDefault();
+            refs.dropZone.classList.add("dragover");
+          });
+
+          refs.dropZone.addEventListener("dragleave", () => {
+            refs.dropZone.classList.remove("dragover");
+          });
+
+          refs.dropZone.addEventListener("drop", (event) => {
+            event.preventDefault();
+            refs.dropZone.classList.remove("dragover");
+            const [file] = event.dataTransfer.files;
+            if (!file) return;
+            try {
+              validateSelectedFile(file);
+              selectFile(file);
+            } catch (error) {
+              setMessage(error.message, "error");
+            }
+          });
+
+          refs.uploadButton.addEventListener("click", createUpload);
+
+          refs.retryButton.addEventListener("click", () => {
+            if (!state.currentUpload) {
+              createUpload();
+              return;
+            }
+            refs.retryButton.disabled = true;
+            refs.uploadButton.disabled = true;
+            setStatus("در حال ادامه");
+            setMessage("آپلود از آخرین بخش تاییدشده ادامه پیدا کرد.");
+            state.currentUpload.start();
+          });
+
+          refs.copyButton.addEventListener("click", async () => {
+            await navigator.clipboard.writeText(refs.downloadLink.value);
+            setMessage("لینک کپی شد.", "success");
+          });
+        }
+
+        refs.themeToggle.addEventListener("click", updateTheme);
+
+        hydrateTheme();
+        buildUploader().catch((error) => {
+          setMessage(error.message || "راه‌اندازی آپلودر ناموفق بود.", "error");
+          setStatus("خطا");
+        });
+</script>
+</body>
+</html>
