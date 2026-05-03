@@ -17,6 +17,12 @@ A secure resumable uploader built with FastAPI, `tus`, `python-dotenv`, and a re
 ```text
 .
 ├── main.py
+├── utils/
+│   ├── config.py
+│   ├── middlewares.py
+│   ├── routes.py
+│   ├── storage.py
+│   └── validators.py
 ├── requirements.txt
 ├── .env.sample
 ├── static/
