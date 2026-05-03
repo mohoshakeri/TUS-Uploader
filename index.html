@@ -1,760 +1,1126 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-        <meta charset="UTF-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <meta name="color-scheme" content="light dark"/>
-        <title>آپلودر TUS</title>
-        <link rel="icon" href="/static/favicon.ico"/>
-        <link
-                rel="stylesheet"
-                href="https://lib.arvancloud.ir/vazir-font/33.003/Farsi-Digits-Non-Latin/Vazirmatn-FD-NL-font-face.css"
-        />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="color-scheme" content="light dark"/>
+  <title>آپلودر TUS</title>
+  <link rel="icon" href="/static/favicon.ico"/>
+  <link rel="stylesheet" href="https://lib.arvancloud.ir/vazir-font/33.003/Farsi-Digits-Non-Latin/Vazirmatn-FD-NL-font-face.css"/>
 
-        <style>
-                :root {
-                  color-scheme: light;
-                  --bg: #f7f7f7;
-                  --card: #ffffff;
-                  --soft: #f0f0f0;
-                  --text: #111111;
-                  --muted: #666666;
-                  --line: #dedede;
-                  --accent: #111111;
-                  --success: #0f8a43;
-                  --error: #c72828;
-                }
+  <style>
+    /* ─── DesignTokens ─── */
+    :root {
+      color-scheme: light;
+      --bg:          #f2f2f4;
+      --surface:     #ffffff;
+      --surface-2:   #f7f7f9;
+      --border:      rgba(0,0,0,0.08);
+      --text:        #0d0d0d;
+      --text-muted:  #7a7a8a;
+      --accent: #000;
+      --accent-glow: rgba(159, 159, 159, 0.3);
+      --accent-2: #5e5e5e;
+      --success:     #22c55e;
+      --success-bg:  rgba(34,197,94,0.12);
+      --error:       #ef4444;
+      --error-bg:    rgba(239,68,68,0.12);
+      --warn:        #f59e0b;
+      --shadow-sm:   0 2px 8px rgba(0,0,0,0.06);
+      --shadow-md:   0 8px 32px rgba(0,0,0,0.10);
+      --shadow-lg:   0 20px 60px rgba(0,0,0,0.14);
+      --radius-sm:   10px;
+      --radius-md:   18px;
+      --radius-lg:   28px;
+      --radius-pill: 999px;
+      --transition:  0.22s cubic-bezier(.4,0,.2,1);
+    }
 
-                body[data-theme="dark"] {
-                  color-scheme: dark;
-                  --bg: #0d0d0d;
-                  --card: #171717;
-                  --soft: #202020;
-                  --text: #f5f5f5;
-                  --muted: #b2b2b2;
-                  --line: #303030;
-                  --accent: #ffffff;
-                  --success: #49d17c;
-                  --error: #ff7d7d;
-                }
+    body[data-theme="dark"] {
+      color-scheme: dark;
+      --bg:          #080810;
+      --surface:     #111118;
+      --surface-2:   #1a1a24;
+      --border:      rgba(255,255,255,0.07);
+      --text:        #eeeef5;
+      --text-muted:  #6b6b80;
+      --accent: #7d7d7d;
+      --accent-glow: rgba(181, 181, 181, 0.25);
+      --accent-2: #2f2f2f;
+      --success:     #4ade80;
+      --success-bg:  rgba(74,222,128,0.1);
+      --error:       #f87171;
+      --error-bg:    rgba(248,113,113,0.1);
+      --warn:        #fbbf24;
+      --shadow-sm:   0 2px 8px rgba(0,0,0,0.4);
+      --shadow-md:   0 8px 32px rgba(0,0,0,0.5);
+      --shadow-lg:   0 20px 60px rgba(0,0,0,0.7);
+    }
 
-                * {
-                  box-sizing: border-box;
-                }
+    /* ─── Reset ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-                html,
-                body {
-                  margin: 0;
-                  min-height: 100%;
-                }
+    html, body {
+      min-height: 100%;
+      font-family: "Vazirmatn FD NL", sans-serif;
+    }
 
-                body {
-                  font-family: Vazirmatn FD NL, sans-serif;
-                  background: var(--bg);
-                  color: var(--text);
-                  transition: background 0.2s ease, color 0.2s ease;
-                }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      transition: background var(--transition), color var(--transition);
+      min-height: 100vh;
+    }
 
-                .page-shell {
-                  min-height: 100vh;
-                  display: grid;
-                  place-items: center;
-                  padding: 20px;
-                }
+    /* ─── BackgroundMesh ─── */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, var(--accent-glow) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 90%, rgba(167,139,250,0.12) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity var(--transition);
+    }
 
-                .single-card {
-                  width: min(100%, 760px);
-                  background: var(--card);
-                  border: 1px solid var(--line);
-                  border-radius: 28px;
-                  padding: 28px;
-                  text-align: center;
-                  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.08);
-                }
+    /* ─── PageShell ─── */
+    .page-shell {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px 16px;
+    }
 
-                .theme-toggle,
-                .primary-button,
-                .ghost-button,
-                #copyButton {
-                  font: inherit;
-                  border-radius: 14px;
-                  border: 1px solid var(--line);
-                  cursor: pointer;
-                  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
-                }
+    /* ─── Card ─── */
+    .card {
+      width: min(100%, 680px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px 32px 32px;
+      box-shadow: var(--shadow-lg);
+      animation: cardIn 0.5s cubic-bezier(.22,1,.36,1) both;
+    }
 
-                .theme-toggle:hover,
-                .primary-button:hover,
-                .ghost-button:hover,
-                #copyButton:hover,
-                .drop-zone:hover {
-                  transform: translateY(-2px);
-                }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(24px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
 
-                .theme-toggle {
-                  display: inline-flex;
-                  align-items: center;
-                  gap: 10px;
-                  background: var(--soft);
-                  color: var(--text);
-                  padding: 10px 16px;
-                  margin: 0 auto 20px;
-                }
+    /* ─── Header ─── */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
 
-                .toggle-dot {
-                  width: 24px;
-                  height: 12px;
-                  border-radius: 999px;
-                  background: var(--accent);
-                }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-                .brand-logo {
-                  width: 164px;
-                  height: 164px;
-                  object-fit: contain;
-                  display: block;
-                  margin: 0 auto 16px;
-                }
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+    }
 
-                body[data-theme="dark"] .brand-logo {
-                  filter: invert(0.9);
-                }
+    body[data-theme="dark"] .brand-logo { filter: invert(0.85); }
 
-                .eyebrow {
-                  margin: 0 0 10px;
-                  color: var(--muted);
-                  font-size: 0.9rem;
-                }
+    .brand-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
 
-                h1 {
-                  margin: 0 0 10px;
-                  font-size: clamp(1.6rem, 4vw, 2.4rem);
-                }
+    /* ─── ThemeToggle ─── */
+    .theme-toggle {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      border-radius: var(--radius-pill);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: background var(--transition);
+      flex-shrink: 0;
+    }
 
-                .hero-text {
-                  margin: 0 auto 24px;
-                  max-width: 40rem;
-                  color: var(--muted);
-                  line-height: 1.9;
-                }
+    .theme-toggle::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      transition: transform var(--transition), background var(--transition);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
 
-                .password-wrap {
-                  width: min(100%, 420px);
-                  margin: 0 auto 18px;
-                  text-align: right;
-                }
+    body[data-theme="dark"] .theme-toggle::after {
+      transform: translateX(-22px);
+    }
 
-                .password-wrap label {
-                  display: block;
-                  margin-bottom: 8px;
-                  color: var(--muted);
-                  font-size: 0.92rem;
-                }
+    .theme-toggle-label {
+      position: absolute;
+      width: 1px; height: 1px;
+      overflow: hidden; clip: rect(0,0,0,0);
+    }
 
-                .password-wrap input {
-                  width: 100%;
-                  padding: 13px 14px;
-                  border-radius: 14px;
-                  border: 1px solid var(--line);
-                  background: var(--soft);
-                  color: var(--text);
-                  font: inherit;
-                }
+    /* ─── Hero ─── */
+    .hero {
+      text-align: center;
+      margin-bottom: 28px;
+    }
 
-                .drop-zone {
-                  display: grid;
-                  gap: 10px;
-                  justify-items: center;
-                  padding: 34px 18px;
-                  border: 2px dashed var(--accent);
-                  border-radius: 22px;
-                  background: var(--soft);
-                  cursor: pointer;
-                  margin-bottom: 18px;
-                  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
-                }
+    .hero h1 {
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
 
-                .drop-zone.dragover {
-                  background: var(--text);
-                  color: var(--bg);
-                }
+    .hero p {
+      color: var(--text-muted);
+      font-size: 0.93rem;
+      line-height: 1.8;
+      max-width: 36rem;
+      margin: 0 auto;
+    }
 
-                .drop-zone small {
-                  color: var(--muted);
-                }
+    /* ─── PasswordWrap ─── */
+    .password-wrap {
+      margin-bottom: 20px;
+    }
 
-                .drop-icon {
-                  width: 54px;
-                  height: 54px;
-                  display: grid;
-                  place-items: center;
-                  border-radius: 50%;
-                  background: var(--accent);
-                  color: var(--bg);
-                  font-size: 2rem;
-                }
+    .field-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-align: right;
+    }
 
-                .action-row,
-                .status-row,
-                .link-row {
-                  display: flex;
-                  gap: 12px;
-                  justify-content: center;
-                  align-items: center;
-                }
+    .field-input {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
 
-                .action-row {
-                  margin-bottom: 18px;
-                }
+    .field-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
 
-                .primary-button,
-                .ghost-button,
-                #copyButton {
-                  padding: 12px 18px;
-                  background: var(--soft);
-                  color: var(--text);
-                }
+    /* ─── DropZone ─── */
+    .drop-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 40px 20px;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface-2);
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+      text-align: center;
+    }
 
-                .primary-button {
-                  background: var(--accent);
-                  color: var(--bg);
-                  border-color: var(--accent);
-                }
+    .drop-zone:hover {
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 5%, var(--surface-2));
+      transform: translateY(-2px);
+    }
 
-                .primary-button:disabled,
-                .ghost-button:disabled {
-                  opacity: 0.45;
-                  cursor: not-allowed;
-                  transform: none;
-                }
+    .drop-zone.dragover {
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 10%, var(--surface-2));
+      transform: scale(1.01);
+    }
 
-                .status-row {
-                  flex-wrap: wrap;
-                  margin-bottom: 14px;
-                  color: var(--muted);
-                }
+    .drop-zone.has-file {
+      border-style: solid;
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 7%, var(--surface-2));
+    }
 
-                .status-pill {
-                  padding: 7px 12px;
-                  border-radius: 999px;
-                  background: var(--soft);
-                  color: var(--text);
-                }
+    .drop-icon-wrap {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: grid;
+      place-items: center;
+      box-shadow: 0 0 24px var(--accent-glow);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
 
-                .inline-link {
-                  margin-top: 0;
-                  margin-bottom: 18px;
-                }
+    .drop-zone:hover .drop-icon-wrap,
+    .drop-zone.dragover .drop-icon-wrap {
+      transform: scale(1.1);
+      box-shadow: 0 0 36px var(--accent-glow);
+    }
 
-                .progress-stage {
-                  margin-bottom: 16px;
-                }
+    .drop-icon-wrap svg {
+      width: 26px;
+      height: 26px;
+      stroke: #fff;
+      fill: none;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
 
-                .progress-meta {
-                  display: grid;
-                  gap: 10px;
-                  align-items: center;
-                }
+    .drop-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
 
-                .progress-meta.top {
-                  grid-template-columns: 1.4fr 0.9fr 1.2fr;
-                  margin-bottom: 10px;
-                }
+    .drop-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
 
-                .progress-meta.bottom {
-                  grid-template-columns: repeat(2, minmax(0, 1fr));
-                  margin-top: 10px;
-                }
+    #allowedTypes {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
 
-                .meta-chip,
-                .message-box,
-                .link-box {
-                  background: var(--soft);
-                  border: 1px solid var(--line);
-                  border-radius: 16px;
-                }
+    /* ─── SelectedFileBadge ─── */
+    .file-badge {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+      animation: slideIn 0.25s ease both;
+    }
 
-                .meta-chip {
-                  padding: 12px 14px;
-                  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent), var(--soft);
-                }
+    .file-badge.visible { display: flex; }
 
-                .meta-chip span {
-                  display: block;
-                  font-size: 0.82rem;
-                  color: var(--muted);
-                  margin-bottom: 8px;
-                }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
-                .meta-chip strong {
-                  font-size: 1.08rem;
-                }
+    .file-badge-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      background: color-mix(in srgb, var(--accent) 15%, transparent);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
 
-                .meta-chip.center {
-                  transform: translateY(8px);
-                }
+    .file-badge-icon svg {
+      width: 18px; height: 18px;
+      stroke: var(--accent);
+      fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
 
-                .progress-shell {
-                  position: relative;
-                  width: 100%;
-                  height: 20px;
-                  border-radius: 999px;
-                  background:
-                    linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent),
-                    var(--soft);
-                  overflow: hidden;
-                  border: 1px solid var(--line);
-                }
+    .file-badge-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-                .progress-shell::after {
-                  content: "";
-                  position: absolute;
-                  inset: 3px;
-                  border-radius: inherit;
-                  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-                }
+    .file-badge-size {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
 
-                .progress-bar {
-                  width: 0;
-                  height: 100%;
-                  border-radius: inherit;
-                  background: linear-gradient(90deg, var(--accent), #8b8b8b);
-                  transition: width 0.15s ease;
-                }
+    /* ─── ActionRow ─── */
+    .action-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
 
-                .message-box,
-                .link-box {
-                  margin-top: 16px;
-                  padding: 14px;
-                }
+    .btn {
+      flex: 1;
+      padding: 13px 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      font: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition), background var(--transition);
+    }
 
-                .message-box.is-error {
-                  color: var(--error);
-                  border-color: var(--error);
-                }
+    .btn:hover:not(:disabled) { transform: translateY(-2px); }
+    .btn:active:not(:disabled) { transform: translateY(0); }
 
-                .message-box.is-success {
-                  color: var(--success);
-                  border-color: var(--success);
-                }
+    .btn:disabled {
+      opacity: 0.38;
+      cursor: not-allowed;
+      transform: none !important;
+    }
 
-                .link-box label {
-                  display: block;
-                  margin-bottom: 10px;
-                }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
 
-                #downloadLink {
-                  width: 100%;
-                  min-width: 0;
-                  padding: 12px 14px;
-                  border-radius: 12px;
-                  border: 1px solid var(--line);
-                  background: var(--card);
-                  color: var(--text);
-                  font: inherit;
-                }
+    .btn-primary:hover:not(:disabled) {
+      box-shadow: 0 8px 28px var(--accent-glow);
+    }
 
-                @media (max-width: 820px) {
-                  .progress-meta.top,
-                  .progress-meta.bottom {
-                    grid-template-columns: 1fr;
-                  }
+    .btn-ghost {
+      background: var(--surface-2);
+      color: var(--text);
+    }
 
-                  .meta-chip.center {
-                    transform: none;
-                  }
-                }
+    .btn-ghost:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
+      border-color: var(--accent);
+    }
 
-                @media (max-width: 560px) {
-                  .single-card {
-                    padding: 18px;
-                  }
+    /* ─── ProgressStage ─── */
+    .progress-stage {
+      display: none;
+      flex-direction: column;
+      gap: 0;
+      margin-bottom: 24px;
+      animation: slideIn 0.3s ease both;
+    }
 
-                  .action-row,
-                  .link-row {
-                    flex-direction: column;
-                  }
+    .progress-stage.visible { display: flex; }
 
-                  .primary-button,
-                  .ghost-button,
-                  #copyButton {
-                    width: 100%;
-                  }
+    /* Progress bar shell */
+    .progress-shell {
+      position: relative;
+      width: 100%;
+      height: 8px;
+      border-radius: var(--radius-pill);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
 
-                  .password-wrap {
-                    width: 100%;
-                  }
-                }
-        </style>
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 0.2s ease;
+      position: relative;
+    }
+
+    .progress-bar::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+      animation: shimmer 1.8s infinite;
+    }
+
+    @keyframes shimmer {
+      from { transform: translateX(-100%); }
+      to   { transform: translateX(300%); }
+    }
+
+    /* Stats row around the progress bar */
+    .stats-above {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .stats-below {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-item.center { text-align: center; }
+    .stat-item.left   { text-align: left; }
+    .stat-item.right  { text-align: right; }
+
+    .stat-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .stat-value.accent { color: var(--accent); }
+
+    /* ─── StatusBar ─── */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: background var(--transition), box-shadow var(--transition);
+      flex-shrink: 0;
+    }
+
+    .status-dot.uploading {
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+      animation: pulse 1.4s infinite;
+    }
+
+    .status-dot.success { background: var(--success); }
+    .status-dot.error   { background: var(--error); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.7); }
+    }
+
+    .status-text {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .file-name-display {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ─── LinkBox ─── */
+    .link-box {
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: var(--success-bg);
+      border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);
+      margin-bottom: 20px;
+      animation: slideIn 0.3s ease both;
+    }
+
+    .link-box-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--success);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .link-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    #downloadLink {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.88rem;
+      outline: none;
+    }
+
+    .btn-copy {
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: var(--success);
+      color: #fff;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition);
+      flex-shrink: 0;
+    }
+
+    .btn-copy:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(34,197,94,0.3); }
+
+    /* ─── ToastSystem ─── */
+    .toast-container {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 10px;
+      z-index: 9999;
+      width: min(calc(100vw - 32px), 460px);
+      pointer-events: none;
+    }
+
+    .toast {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md), 0 0 0 1px var(--border);
+      pointer-events: all;
+      animation: toastIn 0.3s cubic-bezier(.22,1,.36,1) both;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      backdrop-filter: blur(12px);
+    }
+
+    .toast.removing {
+      animation: toastOut 0.25s ease forwards;
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to   { opacity: 0; transform: translateY(12px) scale(0.95); }
+    }
+
+    .toast-icon {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .toast-icon svg {
+      width: 16px; height: 16px;
+      fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .toast.default .toast-icon { background: var(--surface-2); }
+    .toast.default .toast-icon svg { stroke: var(--text-muted); }
+
+    .toast.success .toast-icon { background: var(--success-bg); }
+    .toast.success .toast-icon svg { stroke: var(--success); }
+
+    .toast.error .toast-icon { background: var(--error-bg); }
+    .toast.error .toast-icon svg { stroke: var(--error); }
+
+    .toast.success { border-color: color-mix(in srgb, var(--success) 25%, var(--border)); }
+    .toast.error   { border-color: color-mix(in srgb, var(--error) 25%, var(--border)); }
+
+    .toast-body { flex: 1; }
+
+    .toast-msg {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .toast-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 2px;
+      border-radius: 6px;
+      line-height: 1;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      transition: color var(--transition);
+    }
+
+    .toast-close:hover { color: var(--text); }
+
+    /* ─── Utilities ─── */
+    [hidden] { display: none !important; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 560px) {
+      .card { padding: 24px 18px; }
+      .action-row { flex-direction: column; }
+      .stats-above, .stats-below { flex-wrap: wrap; gap: 12px; }
+    }
+  </style>
 </head>
-<body data-theme="light">
+<body data-theme="dark">
+
 <main class="page-shell">
-        <section class="single-card">
-                <img src="/static/logo.png" alt="لوگو" class="brand-logo"/>
-                <button id="themeToggle" class="theme-toggle" type="button" aria-label="تغییر تم">
-                        <span>لایت</span>
-                        <span class="toggle-dot"></span>
-                        <span>دارک</span>
-                </button>
-                <h1>فایل را بکشید و اینجا رها کنید</h1>
-                <p class="hero-text">یا با یک کلیک فایل را انتخاب کنید. آپلود در صورت خطا از همان بخش ادامه پیدا
-                        می‌کند.</p>
+  <section class="card">
 
-                <div class="password-wrap" id="passwordWrap">
-                        <label for="passwordInput">پسورد آپلود</label>
-                        <input id="passwordInput" type="password" placeholder="پسورد را وارد کنید"
-                               autocomplete="current-password"/>
-                </div>
+    <!-- CardHeader: brand + theme toggle -->
+    <header class="card-header">
+      <div class="brand">
+        <img src="/static/logo.png" alt="لوگو" class="brand-logo"/>
+        <span class="brand-name">TUS Uploader</span>
+      </div>
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="تغییر تم">
+        <span class="theme-toggle-label">تغییر تم</span>
+      </button>
+    </header>
 
-                <label id="dropZone" class="drop-zone" for="fileInput">
-                        <input id="fileInput" type="file" hidden/>
-                        <span class="drop-icon">+</span>
-                        <strong>ناحیه آپلود</strong>
-                        <span>Drag & Drop یا انتخاب فایل</span>
-                        <small id="allowedTypes">در حال بارگذاری فرمت‌های مجاز...</small>
-                </label>
+    <!-- Hero section -->
+    <div class="hero">
+      <h1>فایل خود را آپلود کنید</h1>
+      <p>بکشید و رها کنید، یا با کلیک انتخاب کنید. آپلود در صورت قطعی از همان بخش ادامه پیدا می‌کند.</p>
+    </div>
 
-                <div class="action-row">
-                        <button id="uploadButton" class="primary-button" type="button" disabled>شروع آپلود</button>
-                        <button id="retryButton" class="ghost-button" type="button" disabled>ادامه آپلود</button>
-                </div>
+    <!-- PasswordWrap (hidden if not required by config) -->
+    <div class="password-wrap" id="passwordWrap" hidden>
+      <label class="field-label" for="passwordInput">پسورد آپلود</label>
+      <input id="passwordInput" class="field-input" type="password" placeholder="پسورد را وارد کنید" autocomplete="current-password"/>
+    </div>
 
-                <div class="status-row">
-                        <span class="status-pill" id="statusPill">آماده</span>
-                        <span id="fileName">فایلی انتخاب نشده است</span>
-                </div>
+    <!-- DropZone -->
+    <label id="dropZone" class="drop-zone" for="fileInput">
+      <input id="fileInput" type="file" hidden/>
+      <div class="drop-icon-wrap">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <span class="drop-title">ناحیه آپلود</span>
+      <span class="drop-subtitle">Drag & Drop یا کلیک برای انتخاب فایل</span>
+      <small id="allowedTypes">در حال بارگذاری فرمت‌های مجاز...</small>
+    </label>
 
-                <div class="link-box inline-link" id="linkBox" hidden>
-                        <label for="downloadLink">لینک مستقیم فایل</label>
-                        <div class="link-row">
-                                <input id="downloadLink" type="text" readonly/>
-                                <button id="copyButton" type="button">کپی</button>
-                        </div>
-                </div>
+    <!-- SelectedFileBadge (visible after file pick) -->
+    <div class="file-badge" id="fileBadge">
+      <div class="file-badge-icon">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <span class="file-badge-name" id="fileName">—</span>
+      <span class="file-badge-size" id="fileSizeBadge">—</span>
+    </div>
 
-                <div class="progress-stage">
-                        <div class="progress-meta top">
-                                <div class="meta-chip wide">
-                                        <span>حجم انتقال</span>
-                                        <strong>
-                                                <bdi id="uploadedSize">0 B</bdi>
-                                                /
-                                                <bdi id="totalSize">0 B</bdi>
-                                        </strong>
-                                </div>
-                                <div class="meta-chip center">
-                                        <span>پیشرفت</span>
-                                        <strong id="progressValue">0%</strong>
-                                </div>
-                                <div class="meta-chip wide">
-                                        <span>سرعت</span>
-                                        <strong id="speedValue">0 B/s</strong>
-                                </div>
-                        </div>
+    <!-- ActionRow -->
+    <div class="action-row">
+      <button id="uploadButton" class="btn btn-primary" type="button" disabled>شروع آپلود</button>
+      <button id="retryButton" class="btn btn-ghost" type="button" disabled>ادامه آپلود</button>
+    </div>
 
-                        <div class="progress-shell" aria-hidden="true">
-                                <div id="progressBar" class="progress-bar"></div>
-                        </div>
+    <!-- StatusBar -->
+    <div class="status-bar">
+      <div class="status-indicator">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusPill">آماده</span>
+      </div>
+      <span class="file-name-display" id="statusEcho">—</span>
+    </div>
 
-                        <div class="progress-meta bottom">
-                                <div class="meta-chip">
-                                        <span>زمان تخمینی</span>
-                                        <strong id="etaValue">--</strong>
-                                </div>
-                                <div class="meta-chip">
-                                        <span>وضعیت</span>
-                                        <strong id="statusEcho">آماده</strong>
-                                </div>
-                        </div>
-                </div>
+    <!-- ProgressStage: hidden before upload starts -->
+    <div class="progress-stage" id="progressStage">
 
-                <div class="message-box" id="messageBox">منتظر انتخاب فایل هستم.</div>
-        </section>
+      <!-- StatsAboveBar: transferred + percent + speed -->
+      <div class="stats-above">
+        <div class="stat-item right">
+          <span class="stat-label">انتقال</span>
+          <span class="stat-value"><bdi id="uploadedSize">0 B</bdi> / <bdi id="totalSize">0 B</bdi></span>
+        </div>
+        <div class="stat-item center">
+          <span class="stat-label">پیشرفت</span>
+          <span class="stat-value accent" id="progressValue">0%</span>
+        </div>
+        <div class="stat-item left">
+          <span class="stat-label">سرعت</span>
+          <span class="stat-value" id="speedValue">0 B/s</span>
+        </div>
+      </div>
+
+      <!-- ProgressBar -->
+      <div class="progress-shell" aria-hidden="true">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+
+      <!-- StatsBelowBar: eta + status -->
+      <div class="stats-below">
+        <div class="stat-item right">
+          <span class="stat-label">زمان تخمینی</span>
+          <span class="stat-value" id="etaValue">--</span>
+        </div>
+        <div class="stat-item left">
+          <span class="stat-label">وضعیت</span>
+          <span class="stat-value" id="statusEchoProgress">آماده</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LinkBox: visible after success -->
+    <div class="link-box" id="linkBox" hidden>
+      <div class="link-box-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        آپلود موفق — لینک مستقیم فایل
+      </div>
+      <div class="link-row">
+        <input id="downloadLink" type="text" readonly/>
+        <button id="copyButton" class="btn-copy" type="button">کپی</button>
+      </div>
+    </div>
+
+  </section>
 </main>
-    <script
-      src="/static/tus.js"></script>
+
+<!-- ToastContainer: floating message system -->
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+<script src="/static/tus.js"></script>
 <script>
-        const state = {
-          config: null,
-          currentUploadId: null,
-          previousBytes: 0,
-          previousTime: 0,
-          selectedFile: null,
-          currentUpload: null,
-        };
+  // ─── State ───────────────────────────────────────────────────────────────────
+  const state = {
+    config: null,
+    currentUploadId: null,
+    previousBytes: 0,
+    previousTime: 0,
+    selectedFile: null,
+    currentUpload: null,
+  };
 
-        const refs = {
-          statusPill: document.getElementById("statusPill"),
-          fileName: document.getElementById("fileName"),
-          uploadedSize: document.getElementById("uploadedSize"),
-          totalSize: document.getElementById("totalSize"),
-          progressValue: document.getElementById("progressValue"),
-          speedValue: document.getElementById("speedValue"),
-          etaValue: document.getElementById("etaValue"),
-          progressBar: document.getElementById("progressBar"),
-          messageBox: document.getElementById("messageBox"),
-          allowedTypes: document.getElementById("allowedTypes"),
-          linkBox: document.getElementById("linkBox"),
-          downloadLink: document.getElementById("downloadLink"),
-          copyButton: document.getElementById("copyButton"),
-          retryButton: document.getElementById("retryButton"),
-          themeToggle: document.getElementById("themeToggle"),
-          uploadButton: document.getElementById("uploadButton"),
-          fileInput: document.getElementById("fileInput"),
-          dropZone: document.getElementById("dropZone"),
-          passwordInput: document.getElementById("passwordInput"),
-          passwordWrap: document.getElementById("passwordWrap"),
-          statusEcho: document.getElementById("statusEcho"),
-        };
+  // ─── Refs ─────────────────────────────────────────────────────────────────────
+  const refs = {
+    statusPill:       document.getElementById("statusPill"),
+    statusDot:        document.getElementById("statusDot"),
+    statusEcho:       document.getElementById("statusEcho"),
+    statusEchoProgress: document.getElementById("statusEchoProgress"),
+    fileName:         document.getElementById("fileName"),
+    fileSizeBadge:    document.getElementById("fileSizeBadge"),
+    fileBadge:        document.getElementById("fileBadge"),
+    uploadedSize:     document.getElementById("uploadedSize"),
+    totalSize:        document.getElementById("totalSize"),
+    progressValue:    document.getElementById("progressValue"),
+    speedValue:       document.getElementById("speedValue"),
+    etaValue:         document.getElementById("etaValue"),
+    progressBar:      document.getElementById("progressBar"),
+    progressStage:    document.getElementById("progressStage"),
+    allowedTypes:     document.getElementById("allowedTypes"),
+    linkBox:          document.getElementById("linkBox"),
+    downloadLink:     document.getElementById("downloadLink"),
+    copyButton:       document.getElementById("copyButton"),
+    retryButton:      document.getElementById("retryButton"),
+    themeToggle:      document.getElementById("themeToggle"),
+    uploadButton:     document.getElementById("uploadButton"),
+    fileInput:        document.getElementById("fileInput"),
+    dropZone:         document.getElementById("dropZone"),
+    passwordInput:    document.getElementById("passwordInput"),
+    passwordWrap:     document.getElementById("passwordWrap"),
+    toastContainer:   document.getElementById("toastContainer"),
+  };
 
-        function formatBytes(bytes) {
-          if (!bytes) return "0 B";
-          const units = ["B", "KB", "MB", "GB", "TB"];
-          const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
-          const value = bytes / 1024 ** index;
-          return `${value.toFixed(value >= 100 || index === 0 ? 0 : 2)} ${units[index]}`;
-        }
+  // ─── Formatters ───────────────────────────────────────────────────────────────
+  function formatBytes(bytes) {
+    if (!bytes) return "0 B";
+    const units = ["B", "KB", "MB", "GB", "TB"];
+    const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+    return `${(bytes / 1024 ** i).toFixed(i === 0 || bytes / 1024 ** i >= 100 ? 0 : 2)} ${units[i]}`;
+  }
 
-        function formatEta(seconds) {
-          if (!Number.isFinite(seconds) || seconds < 0) return "--";
-          const minutes = Math.floor(seconds / 60);
-          const remainder = Math.floor(seconds % 60);
-          if (minutes === 0) return `${remainder}s`;
-          return `${minutes}m ${remainder}s`;
-        }
+  function formatEta(s) {
+    if (!Number.isFinite(s) || s < 0) return "--";
+    const m = Math.floor(s / 60), r = Math.floor(s % 60);
+    return m === 0 ? `${r}s` : `${m}m ${r}s`;
+  }
 
-        function setMessage(text, variant = "") {
-          refs.messageBox.textContent = text;
-          refs.messageBox.classList.remove("is-error", "is-success");
-          if (variant) refs.messageBox.classList.add(`is-${variant}`);
-        }
+  // ─── ToastSystem ──────────────────────────────────────────────────────────────
+  const TOAST_ICONS = {
+    default: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    success: `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`,
+    error:   `<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  };
 
-        function setStatus(text) {
-          refs.statusPill.textContent = text;
-          refs.statusEcho.textContent = text;
-        }
+  function showToast(text, variant = "default", duration = 4000) {
+    const toast = document.createElement("div");
+    toast.className = `toast ${variant}`;
+    toast.innerHTML = `
+      <div class="toast-icon">${TOAST_ICONS[variant] || TOAST_ICONS.default}</div>
+      <div class="toast-body"><p class="toast-msg">${text}</p></div>
+      <button class="toast-close" aria-label="بستن">✕</button>
+    `;
 
-        function updateTheme() {
-          const current = document.body.dataset.theme;
-          const next = current === "light" ? "dark" : "light";
-          document.body.dataset.theme = next;
-          localStorage.setItem("theme", next);
-        }
+    const close = () => {
+      toast.classList.add("removing");
+      setTimeout(() => toast.remove(), 280);
+    };
 
-        function hydrateTheme() {
-          const savedTheme = localStorage.getItem("theme");
-          document.body.dataset.theme = savedTheme === "dark" ? "dark" : "light";
-        }
+    toast.querySelector(".toast-close").addEventListener("click", close);
+    refs.toastContainer.appendChild(toast);
 
-        async function loadConfig() {
-          const response = await fetch("/api/config");
-          if (!response.ok) throw new Error("دریافت تنظیمات آپلود ناموفق بود.");
-          state.config = await response.json();
-          refs.allowedTypes.textContent = `فرمت‌های مجاز: ${state.config.allowed_extensions.join(" ، ")}`;
-          refs.passwordWrap.hidden = !state.config.password_required;
-        }
+    if (duration > 0) setTimeout(close, duration);
+  }
 
-        function extractUploadId(uploadURL) {
-          const parts = new URL(uploadURL).pathname.split("/").filter(Boolean);
-          return parts.at(-1);
-        }
+  // ─── StatusHelpers ────────────────────────────────────────────────────────────
+  function setStatus(text, dotClass = "") {
+    refs.statusPill.textContent = text;
+    refs.statusEcho.textContent = text;
+    refs.statusEchoProgress.textContent = text;
+    refs.statusDot.className = `status-dot ${dotClass}`;
+  }
 
-        async function fetchDownloadLink(uploadId) {
-          const response = await fetch(`/api/files/${uploadId}/link`);
-          const payload = await response.json();
-          if (!response.ok) {
-            throw new Error(payload.detail || "دریافت لینک نهایی ممکن نشد.");
-          }
-          refs.downloadLink.value = payload.download_url;
-          refs.linkBox.hidden = false;
-        }
+  // ─── ThemeSystem ──────────────────────────────────────────────────────────────
+  function updateTheme() {
+    const next = document.body.dataset.theme === "light" ? "dark" : "light";
+    document.body.dataset.theme = next;
+    localStorage.setItem("theme", next);
+  }
 
-        function resetLinkBox() {
-          refs.linkBox.hidden = true;
-          refs.downloadLink.value = "";
-        }
+  function hydrateTheme() {
+    const saved = localStorage.getItem("theme");
+    document.body.dataset.theme = saved === "light" ? "light" : "dark";
+  }
 
-        function updateMetrics(bytesUploaded, bytesTotal) {
-          const now = performance.now();
-          const elapsed = (now - state.previousTime) / 1000;
-          const transferred = bytesUploaded - state.previousBytes;
-          const speed = elapsed > 0 ? transferred / elapsed : 0;
-          const remaining = Math.max(bytesTotal - bytesUploaded, 0);
-          const eta = speed > 0 ? remaining / speed : Infinity;
-          const progress = bytesTotal > 0 ? (bytesUploaded / bytesTotal) * 100 : 0;
+  // ─── ConfigLoader ─────────────────────────────────────────────────────────────
+  async function loadConfig() {
+    const res = await fetch("/api/config");
+    if (!res.ok) throw new Error("دریافت تنظیمات آپلود ناموفق بود.");
+    state.config = await res.json();
+    refs.allowedTypes.textContent = `فرمت‌های مجاز: ${state.config.allowed_extensions.join(" ، ")}`;
+    refs.passwordWrap.hidden = !state.config.password_required;
+  }
 
-          refs.uploadedSize.textContent = formatBytes(bytesUploaded);
-          refs.totalSize.textContent = formatBytes(bytesTotal);
-          refs.progressValue.textContent = `${progress.toFixed(1)}%`;
-          refs.speedValue.textContent = `${formatBytes(speed)}/s`;
-          refs.etaValue.textContent = formatEta(eta);
-          refs.progressBar.style.width = `${progress}%`;
+  // ─── LinkHelpers ──────────────────────────────────────────────────────────────
+  function extractUploadId(uploadURL) {
+    const parts = new URL(uploadURL).pathname.split("/").filter(Boolean);
+    return parts.at(-1);
+  }
 
-          state.previousBytes = bytesUploaded;
-          state.previousTime = now;
-        }
+  function resetLinkBox() {
+    refs.linkBox.hidden = true;
+    refs.downloadLink.value = "";
+  }
 
-        function selectFile(file) {
-          state.selectedFile = file;
-          state.currentUpload = null;
-          state.currentUploadId = null;
-          state.previousBytes = 0;
-          state.previousTime = performance.now();
-          resetLinkBox();
+  // ─── MetricsUpdater ───────────────────────────────────────────────────────────
+  function updateMetrics(bytesUploaded, bytesTotal) {
+    const now = performance.now();
+    const elapsed = (now - state.previousTime) / 1000;
+    const speed = elapsed > 0 ? (bytesUploaded - state.previousBytes) / elapsed : 0;
+    const remaining = Math.max(bytesTotal - bytesUploaded, 0);
+    const progress = bytesTotal > 0 ? (bytesUploaded / bytesTotal) * 100 : 0;
+
+    refs.uploadedSize.textContent = formatBytes(bytesUploaded);
+    refs.totalSize.textContent = formatBytes(bytesTotal);
+    refs.progressValue.textContent = `${progress.toFixed(1)}%`;
+    refs.speedValue.textContent = `${formatBytes(speed)}/s`;
+    refs.etaValue.textContent = formatEta(speed > 0 ? remaining / speed : Infinity);
+    refs.progressBar.style.width = `${progress}%`;
+
+    state.previousBytes = bytesUploaded;
+    state.previousTime = now;
+  }
+
+  // ─── FileSelector ─────────────────────────────────────────────────────────────
+  function selectFile(file) {
+    state.selectedFile = file;
+    state.currentUpload = null;
+    state.currentUploadId = null;
+    state.previousBytes = 0;
+    state.previousTime = performance.now();
+
+    resetLinkBox();
+    refs.progressStage.classList.remove("visible");
+
+    refs.uploadButton.disabled = false;
+    refs.retryButton.disabled = true;
+
+    refs.fileName.textContent = file.name;
+    refs.fileSizeBadge.textContent = formatBytes(file.size);
+    refs.fileBadge.classList.add("visible");
+    refs.dropZone.classList.add("has-file");
+    refs.statusEcho.textContent = file.name;
+
+    setStatus("آماده", "");
+    showToast("فایل انتخاب شد. برای شروع روی دکمه آپلود بزنید.");
+  }
+
+  // ─── Validator ────────────────────────────────────────────────────────────────
+  function validateSelectedFile(file) {
+    const suffix = `.${file.name.split(".").pop()?.toLowerCase() || ""}`;
+    if (!state.config.allowed_extensions.includes(suffix)) throw new Error("فرمت این فایل مجاز نیست.");
+    if (file.size > state.config.max_upload_size) throw new Error("حجم فایل از حد مجاز بیشتر است.");
+  }
+
+  // ─── UploadCreator ────────────────────────────────────────────────────────────
+  function createUpload() {
+    if (!state.selectedFile) { showToast("ابتدا یک فایل انتخاب کنید.", "error"); return; }
+    if (state.config.password_required && !refs.passwordInput.value.trim()) {
+      showToast("پسورد آپلود الزامی است.", "error"); return;
+    }
+
+    try { validateSelectedFile(state.selectedFile); } catch (err) { showToast(err.message, "error"); return; }
+
+    refs.uploadButton.disabled = true;
+    refs.retryButton.disabled = true;
+
+    // ShowProgressStage on upload start
+    refs.progressStage.classList.add("visible");
+    refs.progressBar.style.width = "0%";
+    refs.uploadedSize.textContent = "0 B";
+    refs.totalSize.textContent = formatBytes(state.selectedFile.size || 0);
+    refs.progressValue.textContent = "0%";
+    refs.speedValue.textContent = "0 B/s";
+    refs.etaValue.textContent = "--";
+
+    setStatus("در حال آپلود", "uploading");
+    showToast("آپلود آغاز شد.");
+
+    state.currentUpload = new tus.Upload(state.selectedFile, {
+      endpoint: state.config.upload_endpoint,
+      chunkSize: state.config.chunk_size,
+      retryDelays: [0, 1500, 3000, 5000],
+      headers: { "X-Upload-Password": refs.passwordInput.value.trim() },
+      metadata: {
+        filename: state.selectedFile.name,
+        filetype: state.selectedFile.type || "application/octet-stream",
+      },
+      onError(error) {
+        setStatus("خطا", "error");
+        refs.retryButton.disabled = false;
+        refs.uploadButton.disabled = false;
+        showToast(error.message || "آپلود با خطا متوقف شد.", "error");
+      },
+      onProgress(bytesUploaded, bytesTotal) {
+        setStatus("در حال آپلود", "uploading");
+        updateMetrics(bytesUploaded, bytesTotal);
+      },
+      async onSuccess() {
+        try {
+          state.currentUploadId = extractUploadId(state.currentUpload.url);
+          setStatus("تکمیل شد", "success");
+          refs.retryButton.disabled = true;
           refs.uploadButton.disabled = false;
-          refs.retryButton.disabled = true;
-          refs.fileName.textContent = file.name;
-          setStatus("آماده");
-          refs.uploadedSize.textContent = "0 B";
-          refs.totalSize.textContent = formatBytes(file.size || 0);
-          refs.progressValue.textContent = "0%";
-          refs.speedValue.textContent = "0 B/s";
-          refs.etaValue.textContent = "--";
-          refs.progressBar.style.width = "0%";
-          setMessage("فایل انتخاب شد. برای شروع روی دکمه آپلود بزنید.");
+          const ext = state.selectedFile.name.split(".").pop()?.toLowerCase() || "";
+          refs.downloadLink.value = `${state.config.base_url}/f/${state.currentUploadId}${ext ? `.${ext}` : ""}`;
+          refs.linkBox.hidden = false;
+          refs.progressBar.style.width = "100%";
+          refs.progressValue.textContent = "100%";
+          showToast("آپلود با موفقیت تمام شد. لینک مستقیم آماده است.", "success", 6000);
+        } catch (err) {
+          refs.retryButton.disabled = false;
+          showToast(err.message, "error");
         }
+      },
+    });
 
-        function validateSelectedFile(file) {
-          const suffix = `.${file.name.split(".").pop()?.toLowerCase() || ""}`;
-          if (!state.config.allowed_extensions.includes(suffix)) {
-            throw new Error("فرمت این فایل مجاز نیست.");
-          }
-          if (file.size > state.config.max_upload_size) {
-            throw new Error("حجم فایل از حد مجاز بیشتر است.");
-          }
-        }
+    state.currentUpload.findPreviousUploads().then((prev) => {
+      if (prev.length > 0) state.currentUpload.resumeFromPreviousUpload(prev[0]);
+      state.currentUpload.start();
+    }).catch((err) => {
+      setStatus("خطا", "error");
+      refs.uploadButton.disabled = false;
+      refs.retryButton.disabled = false;
+      showToast(err.message || "شروع آپلود ممکن نشد.", "error");
+    });
+  }
 
-        function createUpload() {
-          if (!state.selectedFile) {
-            setMessage("ابتدا یک فایل انتخاب کنید.", "error");
-            return;
-          }
+  // ─── UploaderBootstrap ────────────────────────────────────────────────────────
+  async function buildUploader() {
+    await loadConfig();
 
-          if (state.config.password_required && !refs.passwordInput.value.trim()) {
-            setMessage("پسورد آپلود الزامی است.", "error");
-            return;
-          }
+    refs.fileInput.addEventListener("change", (e) => {
+      const [file] = e.target.files;
+      if (!file) return;
+      try { validateSelectedFile(file); selectFile(file); }
+      catch (err) { showToast(err.message, "error"); }
+    });
 
-          validateSelectedFile(state.selectedFile);
-          refs.uploadButton.disabled = true;
-          refs.retryButton.disabled = true;
-          setStatus("در حال آپلود");
-          setMessage("آپلود شروع شد.");
+    refs.dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      refs.dropZone.classList.add("dragover");
+    });
 
-          state.currentUpload = new tus.Upload(state.selectedFile, {
-            endpoint: state.config.upload_endpoint,
-            chunkSize: state.config.chunk_size,
-            retryDelays: [0, 1500, 3000, 5000],
-            headers: {
-              "X-Upload-Password": refs.passwordInput.value.trim(),
-            },
-            metadata: {
-              filename: state.selectedFile.name,
-              filetype: state.selectedFile.type || "application/octet-stream",
-            },
-            onError(error) {
-              setStatus("خطا");
-              refs.retryButton.disabled = false;
-              refs.uploadButton.disabled = false;
-              setMessage(error.message || "آپلود با خطا متوقف شد.", "error");
-            },
-            onProgress(bytesUploaded, bytesTotal) {
-              setStatus("در حال آپلود");
-              updateMetrics(bytesUploaded, bytesTotal);
-            },
-            async onSuccess() {
-              try {
-                state.currentUploadId = extractUploadId(state.currentUpload.url);
-                setStatus("تکمیل شد");
-                refs.retryButton.disabled = true;
-                refs.uploadButton.disabled = false;
-                const extension = state.selectedFile.name.split(".").pop()?.toLowerCase() || "";
-                refs.downloadLink.value = `${state.config.base_url}/uploads/${state.currentUploadId}${extension ? `.${extension}` : ""}`;
-                refs.linkBox.hidden = false;
-                setMessage("آپلود با موفقیت تمام شد و لینک مستقیم فایل آماده است.", "success");
-              } catch (error) {
-                refs.retryButton.disabled = false;
-                setMessage(error.message, "error");
-              }
-            },
-          });
+    refs.dropZone.addEventListener("dragleave", () => refs.dropZone.classList.remove("dragover"));
 
-          state.currentUpload.findPreviousUploads().then((previousUploads) => {
-            if (previousUploads.length > 0) {
-              state.currentUpload.resumeFromPreviousUpload(previousUploads[0]);
-            }
-            state.currentUpload.start();
-          }).catch((error) => {
-            setStatus("خطا");
-            refs.uploadButton.disabled = false;
-            refs.retryButton.disabled = false;
-            setMessage(error.message || "شروع آپلود ممکن نشد.", "error");
-          });
-        }
+    refs.dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      refs.dropZone.classList.remove("dragover");
+      const [file] = e.dataTransfer.files;
+      if (!file) return;
+      try { validateSelectedFile(file); selectFile(file); }
+      catch (err) { showToast(err.message, "error"); }
+    });
 
-        async function buildUploader() {
-          await loadConfig();
+    refs.uploadButton.addEventListener("click", createUpload);
 
-          refs.fileInput.addEventListener("change", (event) => {
-            const [file] = event.target.files;
-            if (!file) return;
-            try {
-              validateSelectedFile(file);
-              selectFile(file);
-            } catch (error) {
-              setMessage(error.message, "error");
-            }
-          });
+    refs.retryButton.addEventListener("click", () => {
+      if (!state.currentUpload) { createUpload(); return; }
+      refs.retryButton.disabled = true;
+      refs.uploadButton.disabled = true;
+      setStatus("در حال ادامه", "uploading");
+      showToast("آپلود از آخرین بخش تاییدشده ادامه پیدا کرد.");
+      state.currentUpload.start();
+    });
 
-          refs.dropZone.addEventListener("dragover", (event) => {
-            event.preventDefault();
-            refs.dropZone.classList.add("dragover");
-          });
+    refs.copyButton.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(refs.downloadLink.value);
+      showToast("لینک با موفقیت کپی شد.", "success");
+    });
+  }
 
-          refs.dropZone.addEventListener("dragleave", () => {
-            refs.dropZone.classList.remove("dragover");
-          });
+  // ─── Init ─────────────────────────────────────────────────────────────────────
+  refs.themeToggle.addEventListener("click", updateTheme);
+  hydrateTheme();
 
-          refs.dropZone.addEventListener("drop", (event) => {
-            event.preventDefault();
-            refs.dropZone.classList.remove("dragover");
-            const [file] = event.dataTransfer.files;
-            if (!file) return;
-            try {
-              validateSelectedFile(file);
-              selectFile(file);
-            } catch (error) {
-              setMessage(error.message, "error");
-            }
-          });
-
-          refs.uploadButton.addEventListener("click", createUpload);
-
-          refs.retryButton.addEventListener("click", () => {
-            if (!state.currentUpload) {
-              createUpload();
-              return;
-            }
-            refs.retryButton.disabled = true;
-            refs.uploadButton.disabled = true;
-            setStatus("در حال ادامه");
-            setMessage("آپلود از آخرین بخش تاییدشده ادامه پیدا کرد.");
-            state.currentUpload.start();
-          });
-
-          refs.copyButton.addEventListener("click", async () => {
-            await navigator.clipboard.writeText(refs.downloadLink.value);
-            setMessage("لینک کپی شد.", "success");
-          });
-        }
-
-        refs.themeToggle.addEventListener("click", updateTheme);
-
-        hydrateTheme();
-        buildUploader().catch((error) => {
-          setMessage(error.message || "راه‌اندازی آپلودر ناموفق بود.", "error");
-          setStatus("خطا");
-        });
+  buildUploader().catch((err) => {
+    showToast(err.message || "راه‌اندازی آپلودر ناموفق بود.", "error");
+    setStatus("خطا", "error");
+  });
 </script>
 </body>
 </html>
