@@ -2,6 +2,8 @@
 
 A secure resumable uploader built with FastAPI, `tus`, `python-dotenv`, and a responsive Uppy-based frontend.
 
+![img.png](static/ss.png)
+
 ## Features
 
 - Chunked upload flow with `POST`, `HEAD`, `PATCH`, and `OPTIONS` endpoints based on the tus 1.0 protocol
