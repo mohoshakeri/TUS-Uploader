@@ -218,6 +218,8 @@ async def get_uploaded_file_link(upload_id: str) -> JSONResponse:
     return JSONResponse(
         {
             FILE_NAME_KEY: file_path.name,
-            DOWNLOAD_URL_KEY: "{}{}/{}".format(BASE_URL, UPLOADS_URL_ROUTE, file_path.name),
+            DOWNLOAD_URL_KEY: "{}{}/{}".format(
+                BASE_URL, UPLOADS_URL_ROUTE, file_path.name
+            ),
         }
     )

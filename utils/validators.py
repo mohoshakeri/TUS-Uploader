@@ -62,7 +62,7 @@ def parse_upload_metadata(raw_metadata: str | None) -> dict[str, str]:
         try:
             decoded_value: str = base64.b64decode(encoded_value).decode(UTF_8)
         except (ValueError, binascii.Error, UnicodeDecodeError) as exc:
-                raise HTTPException(
+            raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=ERROR_INVALID_METADATA,
             ) from exc

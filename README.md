@@ -73,6 +73,14 @@ Then open:
 http://localhost:8989
 ```
 
+## Tests
+
+Run the test suite with the standard library unittest runner:
+
+```bash
+python -m unittest discover -s tests
+```
+
 ## Docker
 
 Build and run the container on port 80:
