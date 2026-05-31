@@ -1,1 +1,1 @@
-"""Utility package for the TUS uploader application."""
+__all__: list[str] = []
