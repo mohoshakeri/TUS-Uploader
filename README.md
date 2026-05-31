@@ -73,6 +73,17 @@ Then open:
 http://localhost:8989
 ```
 
+## Docker
+
+Build and run the container on port 80:
+
+```bash
+docker build -t tus-uploader .
+docker run -p 80:80 tus-uploader
+```
+
+For production deployments, `uploads` and `tmp` can be defined as Docker-managed volumes or mounted from a host disk path so uploaded files and resumable upload state survive container replacement. The Dockerfile does not define these mounts directly; configure them in your Docker run command, Compose file, or deployment platform.
+
 ## API
 
 ### Create upload
