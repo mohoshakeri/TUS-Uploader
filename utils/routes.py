@@ -1,9 +1,10 @@
+from html import escape
 import uuid
 from pathlib import Path
 from typing import Any, BinaryIO
 
 from fastapi import APIRouter, HTTPException, Request, Response, status
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 
 from CONSTANTS import (
     ALLOWED_TYPES,
@@ -13,6 +14,8 @@ from CONSTANTS import (
     CONFIG_ALLOWED_EXTENSIONS_KEY,
     CONFIG_BASE_URL_KEY,
     CONFIG_CHUNK_SIZE_KEY,
+    CONFIG_FAVICON_URL_KEY,
+    CONFIG_LOGO_URL_KEY,
     CONFIG_MAX_UPLOAD_SIZE_KEY,
     CONFIG_PASSWORD_REQUIRED_KEY,
     CONFIG_UPLOAD_ENDPOINT_KEY,
@@ -42,16 +45,20 @@ from CONSTANTS import (
     ROOT_ROUTE,
     STATUS_UPLOAD_NOT_COMPLETE,
     STORED_NAME_KEY,
+    TEXT_HTML_UTF_8,
     TUS_EXTENSION,
     TUS_VERSION,
     UPLOADS_URL_ROUTE,
     UPLOAD_ENDPOINT,
     UPLOAD_ID_KEY,
+    UTF_8,
     ZERO_OFFSET,
 )
 from utils.config import (
     BASE_URL,
     CHUNK_SIZE,
+    FAVICON_URL,
+    LOGO_URL,
     MAX_UPLOAD_SIZE,
     PROJECT_ROOT,
     UPLOADS_DIR,
@@ -79,8 +86,11 @@ router: APIRouter = APIRouter()
 
 
 @router.get(ROOT_ROUTE)
-async def index() -> FileResponse:
-    return FileResponse(PROJECT_ROOT / INDEX_FILE_NAME)
+async def index() -> HTMLResponse:
+    html: str = (PROJECT_ROOT / INDEX_FILE_NAME).read_text(encoding=UTF_8)
+    html = html.replace("/static/favicon.ico", escape(FAVICON_URL, quote=True))
+    html = html.replace("/static/logo.png", escape(LOGO_URL, quote=True))
+    return HTMLResponse(content=html, media_type=TEXT_HTML_UTF_8)
 
 
 @router.get(API_CONFIG_ROUTE)
@@ -92,6 +102,8 @@ async def get_config() -> JSONResponse:
         CONFIG_CHUNK_SIZE_KEY: CHUNK_SIZE,
         CONFIG_ALLOWED_EXTENSIONS_KEY: sorted(ALLOWED_TYPES.keys()),
         CONFIG_PASSWORD_REQUIRED_KEY: bool(UPLOAD_PASSWORD),
+        CONFIG_LOGO_URL_KEY: LOGO_URL,
+        CONFIG_FAVICON_URL_KEY: FAVICON_URL,
     }
     return JSONResponse(config_payload)
 

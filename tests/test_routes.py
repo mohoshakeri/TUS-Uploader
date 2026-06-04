@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from fastapi import HTTPException, status
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 
 from CONSTANTS import (
     CONTENT_TYPE_OCTET_STREAM,
@@ -52,13 +52,28 @@ class RouteTests(unittest.IsolatedAsyncioTestCase):
         self.temp_directory.cleanup()
 
     async def test_index_health_and_config_handlers_return_responses(self) -> None:
-        index_response: FileResponse = await routes.index()
+        index_response: HTMLResponse = await routes.index()
         health_response: JSONResponse = await routes.health()
         config_response: JSONResponse = await routes.get_config()
 
-        self.assertIsInstance(index_response, FileResponse)
+        self.assertIsInstance(index_response, HTMLResponse)
         self.assertEqual(health_response.body.decode("utf-8"), '{"status":"ok"}')
         self.assertEqual(config_response.status_code, status.HTTP_200_OK)
+
+    async def test_index_uses_configured_brand_assets(self) -> None:
+        original_logo_url: str = routes.LOGO_URL
+        original_favicon_url: str = routes.FAVICON_URL
+        routes.LOGO_URL = "/static/custom-logo.svg"
+        routes.FAVICON_URL = "/static/custom-favicon.png"
+        try:
+            index_response: HTMLResponse = await routes.index()
+        finally:
+            routes.LOGO_URL = original_logo_url
+            routes.FAVICON_URL = original_favicon_url
+
+        response_body: str = index_response.body.decode("utf-8")
+        self.assertIn('href="/static/custom-favicon.png"', response_body)
+        self.assertIn('src="/static/custom-logo.svg"', response_body)
 
     async def test_tus_options_returns_required_headers(self) -> None:
         response = await routes.tus_options()

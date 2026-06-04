@@ -2,7 +2,7 @@
 
 A secure resumable uploader built with FastAPI, `tus`, `python-dotenv`, and a responsive Uppy-based frontend.
 
-![img.png](static/ss.png)
+![img.png](static/ScreenShot.png)
 
 ## Features
 
@@ -49,7 +49,12 @@ CORS_ALLOWEDS=http://localhost:8989,http://127.0.0.1:8989
 MAX_UPLOAD_SIZE=1073741824
 CHUNK_SIZE=5242880
 UPLOAD_PASSWORD=change-me
+LOGO_URL=/static/logo.png
+FAVICON_URL=/static/favicon.ico
 ```
+
+`LOGO_URL` and `FAVICON_URL` can point to files served from `/static/` or to full external URLs.
+For example, place custom assets in `static/` and set `LOGO_URL=/static/my-logo.svg` and `FAVICON_URL=/static/my-favicon.png`.
 
 ## Install
 

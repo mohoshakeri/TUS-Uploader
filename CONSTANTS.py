@@ -15,6 +15,8 @@ CONFIG_MAX_UPLOAD_SIZE_KEY: str = "max_upload_size"
 CONFIG_CHUNK_SIZE_KEY: str = "chunk_size"
 CONFIG_ALLOWED_EXTENSIONS_KEY: str = "allowed_extensions"
 CONFIG_PASSWORD_REQUIRED_KEY: str = "password_required"
+CONFIG_LOGO_URL_KEY: str = "logo_url"
+CONFIG_FAVICON_URL_KEY: str = "favicon_url"
 FILE_NAME_KEY: str = "file_name"
 DOWNLOAD_URL_KEY: str = "download_url"
 STATUS_KEY: str = "status"
@@ -70,10 +72,14 @@ ENV_CORS_ALLOWEDS: str = "CORS_ALLOWEDS"
 ENV_MAX_UPLOAD_SIZE: str = "MAX_UPLOAD_SIZE"
 ENV_CHUNK_SIZE: str = "CHUNK_SIZE"
 ENV_UPLOAD_PASSWORD: str = "UPLOAD_PASSWORD"
+ENV_LOGO_URL: str = "LOGO_URL"
+ENV_FAVICON_URL: str = "FAVICON_URL"
 
 DEFAULT_DEBUG: str = "NO"
 DEFAULT_PORT: str = "8989"
 DEFAULT_UPLOAD_PASSWORD: str = "1234"
+DEFAULT_LOGO_URL: str = "/static/logo.png"
+DEFAULT_FAVICON_URL: str = "/static/favicon.ico"
 DEBUG_ENABLED_VALUE: str = "YES"
 LOCALHOST: str = "localhost"
 LOCALHOST_IP: str = "127.0.0.1"
@@ -97,6 +103,7 @@ FILENAME_PATTERN: str = r"[A-Za-z0-9._ -]+"
 
 EMPTY_STRING: str = ""
 UTF_8: str = "utf-8"
+TEXT_HTML_UTF_8: str = "text/html; charset=utf-8"
 READ_WRITE_BINARY_MODE: str = "r+b"
 
 STATUS_UPLOAD_NOT_COMPLETE: str = "Upload is not complete yet."
@@ -145,4 +152,3 @@ ALLOWED_TYPES: dict[str, set[str]] = {
     ".ppt": {"application/vnd.ms-powerpoint"},
     ".pptx": {"application/vnd.openxmlformats-officedocument.presentationml.presentation"},
 }
-
