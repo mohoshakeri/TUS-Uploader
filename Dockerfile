@@ -1,9 +1,10 @@
-FROM python:3.12-slim
+FROM mirror-docker.runflare.com/library/python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    DEBUG=NO \
-    PORT=80
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_INDEX_URL=https://mirror-pypi.runflare.com/simple \
 
 WORKDIR /app
 
