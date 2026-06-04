@@ -15,6 +15,7 @@ from CONSTANTS import (
     HEADER_UPLOAD_OFFSET,
     LENGTH_KEY,
     OFFSET_KEY,
+    STORED_DIRECTORY_KEY,
     STORED_NAME_KEY,
     TUS_VERSION,
 )
@@ -37,10 +38,16 @@ class RouteTests(unittest.IsolatedAsyncioTestCase):
         self.original_route_uploads_dir: Path = routes.UPLOADS_DIR
         self.original_storage_uploads_dir: Path = storage.UPLOADS_DIR
         self.original_storage_tmp_dir: Path = storage.TMP_DIR
+        self.original_routes_upload_directories: list[str] = routes.UPLOAD_DIRECTORIES
+        self.original_storage_upload_directories: list[str] = storage.UPLOAD_DIRECTORIES
+        self.original_validators_upload_directories: list[str] = validators.UPLOAD_DIRECTORIES
         self.original_password: str = validators.UPLOAD_PASSWORD
         routes.UPLOADS_DIR = self.project_root / "uploads"
         storage.UPLOADS_DIR = self.project_root / "uploads"
         storage.TMP_DIR = self.project_root / "tmp"
+        routes.UPLOAD_DIRECTORIES = []
+        storage.UPLOAD_DIRECTORIES = []
+        validators.UPLOAD_DIRECTORIES = []
         validators.UPLOAD_PASSWORD = ""
         storage.ensure_directories()
 
@@ -48,6 +55,9 @@ class RouteTests(unittest.IsolatedAsyncioTestCase):
         routes.UPLOADS_DIR = self.original_route_uploads_dir
         storage.UPLOADS_DIR = self.original_storage_uploads_dir
         storage.TMP_DIR = self.original_storage_tmp_dir
+        routes.UPLOAD_DIRECTORIES = self.original_routes_upload_directories
+        storage.UPLOAD_DIRECTORIES = self.original_storage_upload_directories
+        validators.UPLOAD_DIRECTORIES = self.original_validators_upload_directories
         validators.UPLOAD_PASSWORD = self.original_password
         self.temp_directory.cleanup()
 
@@ -121,6 +131,41 @@ class RouteTests(unittest.IsolatedAsyncioTestCase):
         link_response: JSONResponse = await routes.get_uploaded_file_link(upload_id)
         self.assertIn(upload_id, link_response.body.decode("utf-8"))
 
+    async def test_create_upload_accepts_configured_upload_directory(self) -> None:
+        routes.UPLOAD_DIRECTORIES = ["reports", "media"]
+        storage.UPLOAD_DIRECTORIES = ["reports", "media"]
+        validators.UPLOAD_DIRECTORIES = ["reports", "media"]
+        storage.ensure_directories()
+        metadata: str = self._metadata_header("sample.txt", "text/plain", "reports")
+        create_request: RequestStub = RequestStub(
+            {
+                HEADER_TUS_RESUMABLE: TUS_VERSION,
+                HEADER_UPLOAD_LENGTH: "5",
+                HEADER_UPLOAD_METADATA: metadata,
+            }
+        )
+
+        create_response = await routes.create_upload(create_request)
+        upload_id: str = create_response.headers[HEADER_LOCATION].rsplit("/", 1)[-1]
+        stored_name: str = "{}.txt".format(upload_id)
+
+        self.assertTrue((storage.UPLOADS_DIR / "reports" / stored_name).exists())
+        self.assertEqual(storage.read_tus_metadata(upload_id)[STORED_DIRECTORY_KEY], "reports")
+
+        patch_request: RequestStub = RequestStub(
+            {
+                HEADER_TUS_RESUMABLE: TUS_VERSION,
+                HEADER_CONTENT_TYPE: CONTENT_TYPE_OCTET_STREAM,
+                HEADER_UPLOAD_OFFSET: "0",
+            },
+            body=b"hello",
+        )
+        await routes.patch_upload(upload_id, patch_request)
+
+        link_response: JSONResponse = await routes.get_uploaded_file_link(upload_id)
+        link_body: str = link_response.body.decode("utf-8")
+        self.assertIn("/f/reports/{}".format(stored_name), link_body)
+
     async def test_patch_upload_rejects_wrong_offset(self) -> None:
         upload_id: str = "abc"
         stored_name: str = "abc.txt"
@@ -147,10 +192,17 @@ class RouteTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(context.exception.status_code, status.HTTP_409_CONFLICT)
 
-    def _metadata_header(self, filename: str, filetype: str) -> str:
+    def _metadata_header(
+        self, filename: str, filetype: str, directory: str | None = None
+    ) -> str:
         encoded_filename: str = base64.b64encode(filename.encode("utf-8")).decode("ascii")
         encoded_filetype: str = base64.b64encode(filetype.encode("utf-8")).decode("ascii")
-        return "filename {},filetype {}".format(encoded_filename, encoded_filetype)
+        metadata: str = "filename {},filetype {}".format(encoded_filename, encoded_filetype)
+        if directory is None:
+            return metadata
+
+        encoded_directory: str = base64.b64encode(directory.encode("utf-8")).decode("ascii")
+        return "{},directory {}".format(metadata, encoded_directory)
 
 
 if __name__ == "__main__":

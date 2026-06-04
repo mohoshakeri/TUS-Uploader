@@ -198,8 +198,9 @@
       margin: 0 auto;
     }
 
-    /* ─── PasswordWrap ─── */
-    .password-wrap {
+    /* ─── FormFields ─── */
+    .password-wrap,
+    .destination-wrap {
       margin-bottom: 20px;
     }
 
@@ -225,7 +226,18 @@
       transition: border-color var(--transition), box-shadow var(--transition);
     }
 
-    .field-input:focus {
+    .field-select {
+      appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+        linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+      background-position: left 18px center, left 12px center;
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+      padding-left: 40px;
+    }
+
+    .field-input:focus,
+    .field-select:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px var(--accent-glow);
     }
@@ -733,6 +745,12 @@
       <input id="passwordInput" class="field-input" type="password" placeholder="پسورد را وارد کنید" autocomplete="current-password"/>
     </div>
 
+    <!-- DestinationWrap (hidden when no upload directories are configured) -->
+    <div class="destination-wrap" id="destinationWrap" hidden>
+      <label class="field-label" for="destinationSelect">مسیر ذخیره‌سازی</label>
+      <select id="destinationSelect" class="field-input field-select"></select>
+    </div>
+
     <!-- DropZone -->
     <label id="dropZone" class="drop-zone" for="fileInput">
       <input id="fileInput" type="file" hidden/>
@@ -866,6 +884,8 @@
     dropZone:         document.getElementById("dropZone"),
     passwordInput:    document.getElementById("passwordInput"),
     passwordWrap:     document.getElementById("passwordWrap"),
+    destinationSelect: document.getElementById("destinationSelect"),
+    destinationWrap:  document.getElementById("destinationWrap"),
     toastContainer:   document.getElementById("toastContainer"),
   };
 
@@ -937,6 +957,16 @@
     state.config = await res.json();
     refs.allowedTypes.textContent = `فرمت‌های مجاز: ${state.config.allowed_extensions.join(" ، ")}`;
     refs.passwordWrap.hidden = !state.config.password_required;
+
+    refs.destinationSelect.innerHTML = "";
+    const directories = state.config.upload_directories || [];
+    refs.destinationWrap.hidden = directories.length === 0;
+    directories.forEach((directory) => {
+      const option = document.createElement("option");
+      option.value = directory;
+      option.textContent = directory;
+      refs.destinationSelect.appendChild(option);
+    });
   }
 
   // ─── LinkHelpers ──────────────────────────────────────────────────────────────
@@ -1026,6 +1056,15 @@
     if (file.size > state.config.max_upload_size) throw new Error("حجم فایل از حد مجاز بیشتر است.");
   }
 
+  function getSelectedDirectory() {
+    const directories = state.config.upload_directories || [];
+    if (directories.length === 0) return "";
+
+    const directory = refs.destinationSelect.value.trim();
+    if (!directory) throw new Error("مسیر ذخیره‌سازی را انتخاب کنید.");
+    return directory;
+  }
+
   // ─── UploadCreator ────────────────────────────────────────────────────────────
   function createUpload() {
     if (!state.selectedFile) { showToast("ابتدا یک فایل انتخاب کنید.", "error"); return; }
@@ -1034,6 +1073,8 @@
     }
 
     try { validateSelectedFile(state.selectedFile); } catch (err) { showToast(err.message, "error"); return; }
+    let uploadDirectory = "";
+    try { uploadDirectory = getSelectedDirectory(); } catch (err) { showToast(err.message, "error"); return; }
 
     refs.uploadButton.disabled = true;
     refs.retryButton.disabled = true;
@@ -1066,6 +1107,7 @@
       metadata: {
         filename: state.selectedFile.name,
         filetype: state.selectedFile.type || "application/octet-stream",
+        directory: uploadDirectory,
       },
       onError(error) {
         stopMetricsTimer();
@@ -1087,8 +1129,10 @@
           setStatus("تکمیل شد", "success");
           refs.retryButton.disabled = true;
           refs.uploadButton.disabled = false;
-          const ext = state.selectedFile.name.split(".").pop()?.toLowerCase() || "";
-          refs.downloadLink.value = `${state.config.base_url}/f/${state.currentUploadId}${ext ? `.${ext}` : ""}`;
+          const linkResponse = await fetch(`/api/files/${state.currentUploadId}/link`);
+          if (!linkResponse.ok) throw new Error("دریافت لینک مستقیم ناموفق بود.");
+          const linkPayload = await linkResponse.json();
+          refs.downloadLink.value = linkPayload.download_url;
           refs.linkBox.hidden = false;
           refs.progressBar.style.width = "100%";
           refs.progressValue.textContent = "100%";

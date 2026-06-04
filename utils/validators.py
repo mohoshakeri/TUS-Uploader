@@ -17,6 +17,7 @@ from CONSTANTS import (
     ERROR_INVALID_METADATA,
     ERROR_INVALID_PASSWORD,
     ERROR_TUS_RESUMABLE_REQUIRED,
+    ERROR_UPLOAD_DIRECTORY_NOT_ALLOWED,
     ERROR_UNSUPPORTED_PATCH_CONTENT_TYPE,
     ERROR_UPLOAD_LENGTH_REQUIRED,
     ERROR_UPLOAD_LENGTH_ZERO,
@@ -32,9 +33,10 @@ from CONSTANTS import (
     METADATA_KEY_SEPARATOR,
     METADATA_SEPARATOR,
     TUS_VERSION,
+    UPLOAD_DIRECTORY_METADATA_KEY,
     UTF_8,
 )
-from utils.config import MAX_UPLOAD_SIZE, UPLOAD_PASSWORD
+from utils.config import MAX_UPLOAD_SIZE, UPLOAD_DIRECTORIES, UPLOAD_PASSWORD
 
 
 def parse_upload_metadata(raw_metadata: str | None) -> dict[str, str]:
@@ -113,6 +115,20 @@ def validate_file_metadata(metadata: dict[str, str], upload_length: int) -> tupl
         )
 
     return suffix, content_type
+
+
+def validate_upload_directory(metadata: dict[str, str]) -> str:
+    upload_directory: str = metadata.get(UPLOAD_DIRECTORY_METADATA_KEY, EMPTY_STRING).strip()
+    if not upload_directory and not UPLOAD_DIRECTORIES:
+        return EMPTY_STRING
+
+    if upload_directory in UPLOAD_DIRECTORIES:
+        return upload_directory
+
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail=ERROR_UPLOAD_DIRECTORY_NOT_ALLOWED,
+    )
 
 
 def validate_upload_password(request: Request) -> None:

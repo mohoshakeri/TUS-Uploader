@@ -2,6 +2,7 @@ from html import escape
 import uuid
 from pathlib import Path
 from typing import Any, BinaryIO
+from urllib.parse import quote
 
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -18,6 +19,7 @@ from CONSTANTS import (
     CONFIG_LOGO_URL_KEY,
     CONFIG_MAX_UPLOAD_SIZE_KEY,
     CONFIG_PASSWORD_REQUIRED_KEY,
+    CONFIG_UPLOAD_DIRECTORIES_KEY,
     CONFIG_UPLOAD_ENDPOINT_KEY,
     CONTENT_TYPE_KEY,
     DOWNLOAD_URL_KEY,
@@ -45,10 +47,11 @@ from CONSTANTS import (
     ROOT_ROUTE,
     STATUS_UPLOAD_NOT_COMPLETE,
     STORED_NAME_KEY,
+    STORED_DIRECTORY_KEY,
     TEXT_HTML_UTF_8,
     TUS_EXTENSION,
     TUS_VERSION,
-    UPLOADS_URL_ROUTE,
+    UPLOADS_ROUTE,
     UPLOAD_ENDPOINT,
     UPLOAD_ID_KEY,
     UTF_8,
@@ -62,6 +65,7 @@ from utils.config import (
     MAX_UPLOAD_SIZE,
     PROJECT_ROOT,
     UPLOADS_DIR,
+    UPLOAD_DIRECTORIES,
     UPLOAD_PASSWORD,
 )
 from utils.storage import (
@@ -79,6 +83,7 @@ from utils.validators import (
     validate_file_metadata,
     validate_patch_content_type,
     validate_tus_resumable,
+    validate_upload_directory,
     validate_upload_password,
 )
 
@@ -104,6 +109,7 @@ async def get_config() -> JSONResponse:
         CONFIG_PASSWORD_REQUIRED_KEY: bool(UPLOAD_PASSWORD),
         CONFIG_LOGO_URL_KEY: LOGO_URL,
         CONFIG_FAVICON_URL_KEY: FAVICON_URL,
+        CONFIG_UPLOAD_DIRECTORIES_KEY: UPLOAD_DIRECTORIES,
     }
     return JSONResponse(config_payload)
 
@@ -137,10 +143,12 @@ async def create_upload(request: Request) -> Response:
     suffix: str
     content_type: str
     suffix, content_type = validate_file_metadata(metadata, upload_length)
+    upload_directory: str = validate_upload_directory(metadata)
 
     upload_id: str = str(uuid.uuid4())
     stored_name: str = "{}{}".format(upload_id, suffix)
-    file_path: Path = UPLOADS_DIR / stored_name
+    file_path: Path = UPLOADS_DIR / upload_directory / stored_name
+    file_path.parent.mkdir(parents=True, exist_ok=True)
     file_path.touch(exist_ok=False)
 
     write_tus_metadata(
@@ -148,6 +156,7 @@ async def create_upload(request: Request) -> Response:
         {
             UPLOAD_ID_KEY: upload_id,
             STORED_NAME_KEY: stored_name,
+            STORED_DIRECTORY_KEY: upload_directory,
             OFFSET_KEY: ZERO_OFFSET,
             LENGTH_KEY: upload_length,
             CONTENT_TYPE_KEY: content_type,
@@ -227,11 +236,12 @@ async def get_uploaded_file_link(upload_id: str) -> JSONResponse:
             )
 
     file_path: Path = resolve_completed_file(upload_id)
+    relative_file_path: str = file_path.relative_to(UPLOADS_DIR).as_posix()
     return JSONResponse(
         {
             FILE_NAME_KEY: file_path.name,
             DOWNLOAD_URL_KEY: "{}{}/{}".format(
-                BASE_URL, UPLOADS_URL_ROUTE, file_path.name
+                BASE_URL, UPLOADS_ROUTE, quote(relative_file_path)
             ),
         }
     )

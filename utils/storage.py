@@ -7,16 +7,19 @@ from fastapi import HTTPException, status
 from CONSTANTS import (
     ERROR_UPLOADED_FILE_NOT_FOUND,
     ERROR_UPLOAD_SESSION_NOT_FOUND,
+    STORED_DIRECTORY_KEY,
     STORED_NAME_KEY,
     TUS_METADATA_SUFFIX,
     UTF_8,
 )
-from utils.config import TMP_DIR, UPLOADS_DIR
+from utils.config import TMP_DIR, UPLOADS_DIR, UPLOAD_DIRECTORIES
 
 
 def ensure_directories() -> None:
     UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
     TMP_DIR.mkdir(parents=True, exist_ok=True)
+    for upload_directory in UPLOAD_DIRECTORIES:
+        (UPLOADS_DIR / upload_directory).mkdir(parents=True, exist_ok=True)
 
 
 def tus_metadata_path(upload_id: str) -> Path:
@@ -24,7 +27,11 @@ def tus_metadata_path(upload_id: str) -> Path:
 
 
 def upload_path_from_meta(meta: dict[str, Any]) -> Path:
-    return UPLOADS_DIR / meta[STORED_NAME_KEY]
+    stored_directory: str = str(meta.get(STORED_DIRECTORY_KEY, "")).strip()
+    if not stored_directory:
+        return UPLOADS_DIR / meta[STORED_NAME_KEY]
+
+    return UPLOADS_DIR / stored_directory / meta[STORED_NAME_KEY]
 
 
 def write_tus_metadata(upload_id: str, payload: dict[str, Any]) -> None:
@@ -53,7 +60,7 @@ def delete_tus_metadata(upload_id: str) -> None:
 
 
 def resolve_completed_file(upload_id: str) -> Path:
-    matches: list[Path] = list(UPLOADS_DIR.glob("{}.*".format(upload_id)))
+    matches: list[Path] = sorted(UPLOADS_DIR.rglob("{}.*".format(upload_id)))
     if not matches:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

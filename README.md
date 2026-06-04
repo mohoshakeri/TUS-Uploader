@@ -51,10 +51,15 @@ CHUNK_SIZE=5242880
 UPLOAD_PASSWORD=change-me
 LOGO_URL=/static/logo.png
 FAVICON_URL=/static/favicon.ico
+UPLOAD_DIRECTORIES=documents,images
 ```
 
 `LOGO_URL` and `FAVICON_URL` can point to files served from `/static/` or to full external URLs.
 For example, place custom assets in `static/` and set `LOGO_URL=/static/my-logo.svg` and `FAVICON_URL=/static/my-favicon.png`.
+
+Set `UPLOAD_DIRECTORIES` to a comma-separated list of destination folders inside `uploads/`.
+When it is set, the frontend shows a destination select field and stores each upload in the selected folder.
+Entries must be relative paths such as `documents`, `images`, or `clients/acme`; absolute paths and `..` are rejected.
 
 ## Install
 

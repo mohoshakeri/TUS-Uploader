@@ -19,6 +19,7 @@ from utils.storage import ensure_directories
 def create_app() -> FastAPI:
     ensure_directories()
     app_instance: FastAPI = FastAPI(title=APP_TITLE, version=APP_VERSION, debug=DEBUG)
+    register_middlewares(app_instance)
     app_instance.mount(STATIC_ROUTE, StaticFiles(directory=STATIC_DIR), name=STATIC_DIR.name)
     app_instance.mount(UPLOADS_ROUTE, StaticFiles(directory=UPLOADS_DIR), name=UPLOADS_DIR.name)
     app_instance.include_router(router)
