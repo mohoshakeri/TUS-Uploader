@@ -41,25 +41,20 @@ A secure resumable uploader built with FastAPI, `tus`, `python-dotenv`, and a re
 
 Copy `.env.sample` into `.env` if needed. The repo already contains a local `.env` for development.
 
-```env
-DEBUG=YES
-PORT=8989
-BASE_URL=http://localhost:8989
-CORS_ALLOWEDS=http://localhost:8989,http://127.0.0.1:8989
-MAX_UPLOAD_SIZE=1073741824
-CHUNK_SIZE=5242880
-UPLOAD_PASSWORD=change-me
-LOGO_URL=/static/logo.png
-FAVICON_URL=/static/favicon.ico
-UPLOAD_DIRECTORIES=documents,images
-```
+### Env Description
 
-`LOGO_URL` and `FAVICON_URL` can point to files served from `/static/` or to full external URLs.
-For example, place custom assets in `static/` and set `LOGO_URL=/static/my-logo.svg` and `FAVICON_URL=/static/my-favicon.png`.
-
-Set `UPLOAD_DIRECTORIES` to a comma-separated list of destination folders inside `uploads/`.
-When it is set, the frontend shows a destination select field and stores each upload in the selected folder.
-Entries must be relative paths such as `documents`, `images`, or `clients/acme`; absolute paths and `..` are rejected.
+| Variable | Default | Example | Description |
+| --- | --- | --- | --- |
+| `DEBUG` | `NO` | `YES` | Enables FastAPI debug mode and uvicorn reload when set to `YES`. |
+| `PORT` | `8989` | `8989` | Port used when running `python main.py`. |
+| `BASE_URL` | `http://localhost:<PORT>` | `https://upload.example.com` | Public base URL used for TUS `Location` headers and final download links. |
+| `CORS_ALLOWEDS` | `BASE_URL`, localhost variants | `https://app.example.com,https://upload.example.com` | Comma-separated allowed browser origins for upload requests. Include the exact origin where the frontend is opened. |
+| `MAX_UPLOAD_SIZE` | `1073741824` | `2147483648` | Maximum allowed file size in bytes. |
+| `CHUNK_SIZE` | `1048576` | `5242880` | TUS chunk size in bytes used by the frontend uploader. |
+| `UPLOAD_PASSWORD` | `1234` | `change-me` | Optional upload password. Set it to an empty value to disable password protection. |
+| `UPLOAD_DIRECTORIES` | empty | `documents,images,clients/acme` | Optional comma-separated destination folders inside `uploads/`. When set, the frontend shows a destination select field. Absolute paths and `..` are rejected. |
+| `LOGO_URL` | `/static/logo.png` | `/static/my-logo.svg` | Logo URL used in the page header. It can be a `/static/` path or a full external URL. |
+| `FAVICON_URL` | `/static/favicon.ico` | `/static/my-favicon.png` | Browser favicon URL. It can be a `/static/` path or a full external URL. |
 
 ## Install
 
